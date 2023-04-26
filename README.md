@@ -1,4 +1,4 @@
-## CSPR SDK TypeScript Tests: Java
+## CSPR SDK Standrt Tests: TypeScript
 
 This repo holds a set of tests to be run against the Casper Typescript SDK.
 
