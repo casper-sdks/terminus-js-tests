@@ -5,8 +5,8 @@ import {CasperClient, CasperServiceByJsonRPC} from "casper-js-sdk";
 @binding()
 export class CasperSteps {
 
-    private casperClient = new CasperClient("http://localhost:11101/rcp");
-    private rcp = new CasperServiceByJsonRPC("http://localhost:11101/rcp");
+    private casperClient = new CasperClient("http://localhost:11101/rpc");
+    private rcp = new CasperServiceByJsonRPC("http://localhost:11101/rpc");
 
     @given(/^that a nctl node is running in docker$/)
     public givenANctlNodeIsRunningInDocket() {
