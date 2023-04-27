@@ -12,7 +12,7 @@ Points to note are:
 - The tests are built using Cucumber features
 
 
-### How to install / Run
+### How to install / Run Locally
 - Install node v16.13.0 or higher
 - checkout from github:  `git clone git@github.com:stormeye2000/cspr-typescript-sdk-standard-tests.git`
 - `cd cspr-typescript-sdk-standar-tests`
