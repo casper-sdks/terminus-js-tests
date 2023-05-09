@@ -9,7 +9,7 @@ export class CasperSteps {
     private rcp = new CasperServiceByJsonRPC("http://localhost:11101/rpc");
 
     @given(/^that a nctl node is running in docker$/)
-    public givenANctlNodeIsRunningInDocket() {
+    public givenANctlNodeIsRunningInDocker() {
         assert.isNotNull(this.casperClient);
         assert.isNotNull(this.casperClient.nodeClient);
     }
