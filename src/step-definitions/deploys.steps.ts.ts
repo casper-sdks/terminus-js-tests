@@ -21,11 +21,17 @@ import {CLValue} from "casper-js-sdk/dist/lib/CLValue";
 
 type CompleteCallback = () => boolean;
 
-
+/**
+ * Step definitions for the deploys feature.
+ *
+ * @author ian@meywood.com
+ */
 @binding()
 export class DeploysSteps {
 
+    /** The client under test */
     private casperClient = new CasperClient("http://localhost:11101/rpc");
+    /** The map used to share results and variables across step definitions. */
     private parameterMap = ParameterMap.getInstance();
 
     @given(/^that user-(\d+) initiates a transfer to user-(\d+)$/)
@@ -47,7 +53,6 @@ export class DeploysSteps {
     public theTransferAmountId(amount: number) {
         console.info(`And the transfer amount is ${amount}`);
         this.parameterMap.put("transferAmount", amount);
-
     }
 
     @given(/^the transfer gas price is (\d+)$/)
@@ -362,6 +367,4 @@ export class DeploysSteps {
                 assert.fail(`Invalid typeName: ${typeName}`);
         }
     }
-
-
 }
