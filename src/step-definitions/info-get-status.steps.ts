@@ -31,11 +31,6 @@ export class InfoGetStatusSteps {
 
     }
 
-    private getNodeStatus(nodeId: number): any {
-        // Obtain from nctl
-        return NctlUtils.getNodeStatus(nodeId);
-    }
-
     @then(/^an info_get_status_result is returned$/)
     public anInfo_get_status_resultIsReturned() {
         console.info("Then an info_get_status_result is returned");
@@ -98,7 +93,7 @@ export class InfoGetStatusSteps {
 
         console.info(`Then the info_get_status_result has a valid starting_state_root_hash`);
 
-        const statusData:  any = this.parameterMap.get('statusData');
+        const statusData: any = this.parameterMap.get('statusData');
         const jsonNode: any = this.parameterMap.get('expectedJsonNodeStatus');
 
         // noinspection TypeScriptUnresolvedVariable
@@ -121,7 +116,7 @@ export class InfoGetStatusSteps {
 
         console.info(`Then the info_get_status_result has a valid round_length`);
 
-        const statusData:  any = this.parameterMap.get('statusData');
+        const statusData: any = this.parameterMap.get('statusData');
         const jsonNode: any = this.parameterMap.get('expectedJsonNodeStatus');
 
         // noinspection TypeScriptUnresolvedVariable
@@ -155,5 +150,10 @@ export class InfoGetStatusSteps {
 
         expect(statusData.peers[3].address).to.eql(jsonNode.peers[3].address);
         expect(statusData.peers[3].node_id).to.eql(jsonNode.peers[3].node_id);
+    }
+
+    private getNodeStatus(nodeId: number): any {
+        // Obtain from nctl
+        return NctlUtils.getNodeStatus(nodeId);
     }
 }
