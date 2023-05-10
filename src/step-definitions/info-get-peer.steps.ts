@@ -3,6 +3,7 @@ import {ParameterMap} from "../utils/parameter-map";
 import {CasperClient} from "casper-js-sdk";
 import {expect} from "chai";
 import {GetPeersResult} from "casper-js-sdk/dist/services/CasperServiceByJsonRPC";
+import {TestParameters} from "../utils/test-parameters";
 
 /**
  * This interface is not exported by the SDK therefore we have to implement here
@@ -21,7 +22,7 @@ interface Peer {
 export class InfoGetPeerSteps {
 
     private parameterMap = ParameterMap.getInstance();
-    private casperClient = new CasperClient("http://localhost:11101/rpc");
+    private casperClient = new CasperClient(TestParameters.getInstance().getRcpUrl());
 
     @given(/^that the info_get_peers RPC method is invoked against a node$/)
     public async thatTheInfo_get_peersRPCMethodIsInvokedAgainstANode() {

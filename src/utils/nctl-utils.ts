@@ -1,4 +1,5 @@
 import {execSync} from "child_process";
+import {TestParameters} from "./test-parameters";
 
 /**
  * Executes commands against an NCTL node running in docker.
@@ -11,7 +12,8 @@ export class NctlUtils {
     }
 
     private static nctlExec(method: string, params: string): string {
-        const command = `docker exec -t storm-nctl /bin/bash -c "source casper-node/utils/nctl/sh/views/${method} ${params}"`;
+        const dockerName = TestParameters.getInstance().dockerName;
+        const command = `docker exec -t ${dockerName} /bin/bash -c "source casper-node/utils/nctl/sh/views/${method} ${params}"`;
         const stdOut = execSync(command);
         return stdOut.toString();
     }
