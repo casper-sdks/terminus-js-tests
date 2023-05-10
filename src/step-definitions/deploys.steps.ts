@@ -18,6 +18,7 @@ import {Deploy} from "casper-js-sdk/dist/lib/DeployUtil";
 import {GetDeployResult} from "casper-js-sdk/dist/services";
 import {AsymmetricKey} from "casper-js-sdk/dist/lib/Keys";
 import {CLValue} from "casper-js-sdk/dist/lib/CLValue";
+import {TestParameters} from "../utils/test-parameters";
 
 type CompleteCallback = () => boolean;
 
@@ -30,7 +31,7 @@ type CompleteCallback = () => boolean;
 export class DeploysSteps {
 
     /** The client under test */
-    private casperClient = new CasperClient("http://localhost:11101/rpc");
+    private casperClient = new CasperClient(TestParameters.getInstance().getRcpUrl());
     /** The map used to share results and variables across step definitions. */
     private parameterMap = ParameterMap.getInstance();
 
@@ -117,7 +118,7 @@ export class DeploysSteps {
 
         const deployHash: string = this.parameterMap.get("deployResult");
 
-        const eventSteam: EventStream = new EventStream('http://localhost:18101/events/main');
+        const eventSteam: EventStream = new EventStream(TestParameters.getInstance().getEventsBaseUrl() + '/main');
 
         let done = false;
         eventSteam.subscribe(EventName.BlockAdded, event => {

@@ -1,12 +1,13 @@
 import {binding, given, then} from 'cucumber-tsflow';
 import {assert} from 'chai';
 import {CasperClient, CasperServiceByJsonRPC} from "casper-js-sdk";
+import {TestParameters} from "../utils/test-parameters";
 
 @binding()
 export class CasperSteps {
 
-    private casperClient = new CasperClient("http://localhost:11101/rpc");
-    private rcp = new CasperServiceByJsonRPC("http://localhost:11101/rpc");
+    private casperClient = new CasperClient(TestParameters.getInstance().getRcpUrl());
+    private rcp = new CasperServiceByJsonRPC(TestParameters.getInstance().getRcpUrl());
 
     @given(/^that a nctl node is running in docker$/)
     public givenANctlNodeIsRunningInDocker() {
