@@ -3,13 +3,13 @@
  *
  * @author ian@meywood.com
  */
-export class ParameterMap {
+export class ContextMap {
 
-    private static instance = new ParameterMap();
+    private static instance = new ContextMap();
     private map = new Map<string, any>;
 
-    public static getInstance(): ParameterMap {
-        return ParameterMap.instance;
+    public static getInstance(): ContextMap {
+        return ContextMap.instance;
     }
 
     public put<T>(key: string, value: T) {

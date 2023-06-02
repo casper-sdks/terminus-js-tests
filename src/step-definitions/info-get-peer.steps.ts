@@ -1,5 +1,5 @@
 import {binding, given, then} from "cucumber-tsflow";
-import {ParameterMap} from "../utils/parameter-map";
+import {ContextMap} from "../utils/context-map";
 import {CasperClient} from "casper-js-sdk";
 import {expect} from "chai";
 import {GetPeersResult} from "casper-js-sdk/dist/services/CasperServiceByJsonRPC";
@@ -21,14 +21,14 @@ interface Peer {
 @binding()
 export class InfoGetPeerSteps {
 
-    private parameterMap = ParameterMap.getInstance();
+    private contextMap = ContextMap.getInstance();
     private casperClient = new CasperClient(TestParameters.getInstance().getRcpUrl());
 
     @given(/^that the info_get_peers RPC method is invoked against a node$/)
     public async thatTheInfo_get_peersRPCMethodIsInvokedAgainstANode() {
         console.info("Given that the info_get_peers RPC method is invoked against a node");
         await this.casperClient.nodeClient.getPeers().then(peerData => {
-            this.parameterMap.put('peerData', peerData);
+            this.contextMap.put('peerData', peerData);
         });
     }
 
@@ -63,7 +63,7 @@ export class InfoGetPeerSteps {
     }
 
     private getPeerData(): GetPeersResult {
-        return this.parameterMap.get('peerData');
+        return this.contextMap.get('peerData');
     }
 
     private isValidPeer(port: number, peer: Peer) {
