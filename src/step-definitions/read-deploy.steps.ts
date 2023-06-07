@@ -33,6 +33,7 @@ export class ReadDeploySteps {
 
         const parsedJson: any = { deploy: JSON.parse(buf.toString()) };
 
+        // FIXME TS SDK needs fix to allow loading of valid JSON
         const transfer : Deploy = this.casperClient.deployFromJson(parsedJson).unwrap();
         expect(transfer).to.not.be.null;
         this.contextMap.put("transfer", transfer);
