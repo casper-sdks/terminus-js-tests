@@ -22,3 +22,4 @@ Feature: state_get_auction_info RCP method against nctl
     Given that the state_get_auction_info RPC method is invoked by an invalid block hash identifier
     Then an error code of -32001 is returned
     And an error message of "get-auction-info failed to get specified block" is returned
+
