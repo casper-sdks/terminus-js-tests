@@ -1,5 +1,5 @@
 import {binding, given, then} from "cucumber-tsflow";
-import {ParameterMap} from "../utils/parameter-map";
+import {ContextMap} from "../utils/context-map";
 import {expect} from "chai";
 import {CasperClient} from "casper-js-sdk";
 import {TestParameters} from "../utils/test-parameters";
@@ -14,19 +14,19 @@ import {NctlUtils} from "../utils/nctl-utils";
 @binding()
 export class InfoGetStatusSteps {
 
-    private parameterMap = ParameterMap.getInstance();
+    private contextMap = ContextMap.getInstance();
     private casperClient = new CasperClient(TestParameters.getInstance().getRcpUrl());
 
     @given(/^that the info_get_status is invoked against nctl$/)
     public async thatTheInfo_get_statusIsInvoked() {
         const expectedJsonNodeStatus: any = this.getNodeStatus(1);
         expect(expectedJsonNodeStatus).to.not.be.undefined;
-        this.parameterMap.put('expectedJsonNodeStatus', expectedJsonNodeStatus);
+        this.contextMap.put('expectedJsonNodeStatus', expectedJsonNodeStatus);
 
         console.info("Given that the info_get_status is invoked");
 
         await this.casperClient.nodeClient.getStatus().then(statusData => {
-            this.parameterMap.put('statusData', statusData);
+            this.contextMap.put('statusData', statusData);
         });
 
     }
@@ -34,13 +34,13 @@ export class InfoGetStatusSteps {
     @then(/^an info_get_status_result is returned$/)
     public anInfo_get_status_resultIsReturned() {
         console.info("Then an info_get_status_result is returned");
-        const statusData: GetStatusResult = this.parameterMap.get('statusData');
+        const statusData: GetStatusResult = this.contextMap.get('statusData');
         expect(statusData).to.not.be.undefined;
     }
 
     @then(/^the info_get_status_result api_version is "([^"]*)"$/)
     public theinfo_get_status_resultapi_versionis(apiversion: string) {
-        const statusdata: GetStatusResult = this.parameterMap.get('statusData');
+        const statusdata: GetStatusResult = this.contextMap.get('statusData');
         expect(statusdata.api_version).to.eql(apiversion);
     }
 
@@ -48,7 +48,7 @@ export class InfoGetStatusSteps {
     public theInfo_get_status_resultChainspec_nameIs(chainSpecName: string) {
 
         console.info(`Then the info_get_status_result chainspec_name is ${chainSpecName}`);
-        const statusData: any = this.parameterMap.get('statusData');
+        const statusData: any = this.contextMap.get('statusData');
 
         // noinspection TypeScriptUnresolvedVariable
         expect(statusData.chainspec_name).to.eql(chainSpecName);
@@ -59,8 +59,8 @@ export class InfoGetStatusSteps {
 
         console.info(`Then the info_get_status_result has a valid last_added_block_info`);
 
-        const statusData: GetStatusResult = this.parameterMap.get('statusData');
-        const jsonNode: any = this.parameterMap.get('expectedJsonNodeStatus');
+        const statusData: GetStatusResult = this.contextMap.get('statusData');
+        const jsonNode: any = this.contextMap.get('expectedJsonNodeStatus');
         const expectedHash = jsonNode.last_added_block_info.hash;
         const expectedTimestamp = jsonNode.last_added_block_info.timestamp;
         const expectedEraId = jsonNode.last_added_block_info.era_id;
@@ -81,8 +81,8 @@ export class InfoGetStatusSteps {
 
         console.info(`Then the info_get_status_result has a valid our_public_signing_key`);
 
-        const statusData: any = this.parameterMap.get('statusData');
-        const jsonNode: any = this.parameterMap.get('expectedJsonNodeStatus');
+        const statusData: any = this.contextMap.get('statusData');
+        const jsonNode: any = this.contextMap.get('expectedJsonNodeStatus');
 
         // noinspection TypeScriptUnresolvedVariable
         expect(statusData.our_public_signing_key).to.eql(jsonNode.our_public_signing_key);
@@ -93,8 +93,8 @@ export class InfoGetStatusSteps {
 
         console.info(`Then the info_get_status_result has a valid starting_state_root_hash`);
 
-        const statusData: any = this.parameterMap.get('statusData');
-        const jsonNode: any = this.parameterMap.get('expectedJsonNodeStatus');
+        const statusData: any = this.contextMap.get('statusData');
+        const jsonNode: any = this.contextMap.get('expectedJsonNodeStatus');
 
         // noinspection TypeScriptUnresolvedVariable
         expect(statusData.starting_state_root_hash).to.eql(jsonNode.starting_state_root_hash);
@@ -105,8 +105,8 @@ export class InfoGetStatusSteps {
 
         console.info(`Then the info_get_status_result has a valid build_version`);
 
-        const statusData: any = this.parameterMap.get('statusData');
-        const jsonNode: any = this.parameterMap.get('expectedJsonNodeStatus');
+        const statusData: any = this.contextMap.get('statusData');
+        const jsonNode: any = this.contextMap.get('expectedJsonNodeStatus');
 
         expect(statusData.build_version).to.eql(jsonNode.build_version);
     }
@@ -116,8 +116,8 @@ export class InfoGetStatusSteps {
 
         console.info(`Then the info_get_status_result has a valid round_length`);
 
-        const statusData: any = this.parameterMap.get('statusData');
-        const jsonNode: any = this.parameterMap.get('expectedJsonNodeStatus');
+        const statusData: any = this.contextMap.get('statusData');
+        const jsonNode: any = this.contextMap.get('expectedJsonNodeStatus');
 
         // noinspection TypeScriptUnresolvedVariable
         expect(statusData.round_length).to.eql(jsonNode.round_length);
@@ -128,7 +128,7 @@ export class InfoGetStatusSteps {
 
         console.info(`Then the info_get_status_result has a valid uptime`);
 
-        const statusData: any = this.parameterMap.get('statusData');
+        const statusData: any = this.contextMap.get('statusData');
 
         expect(statusData.uptime).to.contain("h ");
         expect(statusData.uptime).to.contain("m ");
@@ -141,8 +141,8 @@ export class InfoGetStatusSteps {
 
         console.info(`Then the info_get_status_result has a valid peers`);
 
-        const statusData: GetStatusResult = this.parameterMap.get('statusData');
-        const jsonNode: any = this.parameterMap.get('expectedJsonNodeStatus');
+        const statusData: GetStatusResult = this.contextMap.get('statusData');
+        const jsonNode: any = this.contextMap.get('expectedJsonNodeStatus');
 
         expect(statusData.peers).to.have.length(jsonNode.peers.length);
         expect(statusData.peers[0].address).to.eql(jsonNode.peers[0].address);
