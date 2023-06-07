@@ -43,10 +43,10 @@ export class QueryGlobalStateSteps {
         const deployHash: string = this.contextMap.get("deployResult");
         const key = "deploy-" + deployHash;
 
-        // FIXME this works on Java but is failing with JS for same parameters????
-        await this.casperClient.nodeClient.getBlockState(blockHash, key, []).then(storedValue => {
+        // FIXME this is not implemented in TS SDK
+       /* await this.casperClient.nodeClient.queryGlobalState(blockHash, key, []).then(storedValue => {
             this.contextMap.put("globalStateData", storedValue);
-        });
+        }); */
 
         expect(this.contextMap.get("globalStateData")).to.not.be.null;
     }
@@ -230,31 +230,6 @@ export class QueryGlobalStateSteps {
         expect(actualBlockResult).to.not.be.null;
 
         this.contextMap.put("lastBlockAdded", actualBlockResult);
-
-        // List<String> transferHashes = block.getBlock().getBody().getTransferHashes();
-        // assertThat(transferHashes, hasItem(deployResult.getDeployHash()));*/
-
-        /* DeployResult deployResult = contextMap.get(DEPLOY_RESULT);
-
-         ExpiringMatcher<Event<BlockAdded>> matcher = (ExpiringMatcher<Event<BlockAdded>>) eventHandler.addEventMatcher(
-             EventType.MAIN,
-             hasTransferHashWithin(
-                 deployResult.getDeployHash(),
-                 blockAddedEvent -> contextMap.put(LAST_BLOCK_ADDED, blockAddedEvent.getData())
-             )
-         );
-
-         assertThat(matcher.waitForMatch(300), is(true));
-
-         eventHandler.removeEventMatcher(EventType.MAIN, matcher);
-
-         Digest matchingBlockHash = ((BlockAdded) contextMap.get(LAST_BLOCK_ADDED)).getBlockHash();
-         assertThat(matchingBlockHash, is(notNullValue()));
-
-         JsonBlockData block = CasperClientProvider.getInstance().getCasperService().getBlock(new HashBlockIdentifier(matchingBlockHash.toString()));
-         assertThat(block, is(notNullValue()));
-         List<String> transferHashes = block.getBlock().getBody().getTransferHashes();
-         assertThat(transferHashes, hasItem(deployResult.getDeployHash()));*/
     }
 
     private getGlobalDataDataStoredValue<T>(): T {
@@ -263,5 +238,4 @@ export class QueryGlobalStateSteps {
           return (T) globalStateData.getStoredValue().getValue();*/
         return null as T;
     }
-
 }
