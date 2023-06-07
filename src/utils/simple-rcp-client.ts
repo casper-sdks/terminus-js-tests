@@ -2,7 +2,7 @@ import * as http from "http";
 
 export class SimpleRcpClient {
 
-    public constructor(private dockerName: string, private hostname: string, private port: number) {
+    public constructor(private hostname: string, private port: number) {
 
     }
 
@@ -57,4 +57,6 @@ export class SimpleRcpClient {
             req.end();
         });
     }
+
+
 }
