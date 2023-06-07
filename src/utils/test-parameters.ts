@@ -30,6 +30,7 @@ export class TestParameters {
     }
 
     public getRcpUrl(): string {
+        // noinspection HttpUrlsUsage
         return 'http://' + this.hostname + ':' + this.rcpPort + '/rpc';
     }
 
@@ -66,5 +67,13 @@ export class TestParameters {
                 this.ssePort = val;
                 break;
         }
+    }
+
+    public getHostname(): string {
+        return this.hostname;
+    }
+
+    public getRcpPort(): number {
+        return +this.rcpPort;
     }
 }
