@@ -30,7 +30,7 @@ export class StateGetAccountInfoSteps {
 
         expect(blockHash).to.not.be.null;
 
-        fail("getStateAccountInfo not implemented in TS Client")
+        fail("state_get_account_info not implemented in TS Client")
         /*  final JsonBlockData block = CasperClientProvider.getInstance().getCasperService().getBlock();
           final BlockIdentifier identifier = new HashBlockIdentifier(block.getBlock().getHash().toString());
 
