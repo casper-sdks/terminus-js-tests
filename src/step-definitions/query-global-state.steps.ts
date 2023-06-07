@@ -1,4 +1,4 @@
-import {CasperClient, DeployUtil, Keys} from "casper-js-sdk";
+import {CasperClient, DeployUtil, Keys, StoredValue} from "casper-js-sdk";
 import {TestParameters} from "../utils/test-parameters";
 import {ContextMap} from "../utils/context-map";
 import {expect} from "chai";
@@ -81,9 +81,11 @@ export class QueryGlobalStateSteps {
     public theQuery_global_state_resultSStoredValueSFromIsTheUserAccountHash(userId: number) {
 
         console.info(`And the query_global_state_result's stored value from is the user-${userId} account hash`);
-        /* String accountHash = nctl.getAccountHash(userId);
-         DeployInfo storedValueDeployInfo = getGlobalDataDataStoredValue();
-         assertThat(storedValueDeployInfo.getFrom(), is(accountHash));*/
+        const storedValue : StoredValue = this.contextMap.get("globalStateData");
+        const accountHash = ""; // TODO nctl.getAccountHash(userId);
+        expect(storedValue.DeployInfo?.from).to.be(accountHash);
+        // DeployInfo storedValueDeployInfo = getGlobalDataDataStoredValue();
+        // assertThat(storedValueDeployInfo.getFrom(), is(accountHash));*/
     }
 
 
