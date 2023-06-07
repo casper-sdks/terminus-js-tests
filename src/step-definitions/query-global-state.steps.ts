@@ -47,7 +47,7 @@ export class QueryGlobalStateSteps {
        /* await this.casperClient.nodeClient.queryGlobalState(blockHash, key, []).then(storedValue => {
             this.contextMap.put("globalStateData", storedValue);
         }); */
-        fail("query_global_state not implemented in TypeScript SDK")
+        fail("query_global_state not implemented in TypeScript SDK");
 
         expect(this.contextMap.get("globalStateData")).to.not.be.null;
     }
