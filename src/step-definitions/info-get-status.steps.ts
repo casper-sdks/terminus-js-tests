@@ -4,7 +4,7 @@ import {expect} from "chai";
 import {CasperClient} from "casper-js-sdk";
 import {TestParameters} from "../utils/test-parameters";
 import {GetStatusResult} from "casper-js-sdk/dist/services/CasperServiceByJsonRPC";
-import {NctlUtils} from "../utils/nctl-utils";
+import {NctlClient} from "../utils/nctl-client";
 
 /**
  * Steps for the info_get_status RPC test feature.
@@ -16,6 +16,7 @@ export class InfoGetStatusSteps {
 
     private contextMap = ContextMap.getInstance();
     private casperClient = new CasperClient(TestParameters.getInstance().getRcpUrl());
+    private nctlClient = new NctlClient(TestParameters.getInstance().dockerName);
 
     @given(/^that the info_get_status is invoked against nctl$/)
     public async thatTheInfo_get_statusIsInvoked() {
@@ -154,6 +155,6 @@ export class InfoGetStatusSteps {
 
     private getNodeStatus(nodeId: number): any {
         // Obtain from nctl
-        return NctlUtils.getNodeStatus(nodeId);
+        return this.nctlClient.getNodeStatus(nodeId);
     }
 }

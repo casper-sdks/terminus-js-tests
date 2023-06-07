@@ -17,8 +17,7 @@ export class StateGetAuctionInfoSteps {
     /** The map used to share results and variables across step definitions. */
     private contextMap = ContextMap.getInstance();
     private simpleRpcClient = new SimpleRcpClient(
-        TestParameters.getInstance().dockerName,
-        TestParameters.getInstance().getHostname(),
+         TestParameters.getInstance().getHostname(),
         TestParameters.getInstance().getRcpPort()
     );
 
