@@ -27,6 +27,8 @@ export class ReadDeploySteps {
         const buf  = fs.readFileSync(`./src/json/${jsonFilename}`);
         expect(buf).to.not.be.undefined;
         const json = "'{'deploy': " + buf.toString() + "}";
+
+        // Log the deploy
         console.info(json);
 
         const parsedJson: any = { deploy: JSON.parse(buf.toString()) };
@@ -34,7 +36,6 @@ export class ReadDeploySteps {
         const transfer : Deploy = this.casperClient.deployFromJson(parsedJson).unwrap();
         expect(transfer).to.not.be.null;
         this.contextMap.put("transfer", transfer);
-""
     }
 
     @then(/^a valid transfer deploy is created$/)
