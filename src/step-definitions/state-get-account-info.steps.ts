@@ -13,8 +13,6 @@ export class StateGetAccountInfoSteps {
 
     /** The client under test */
     private casperClient = new CasperClient(TestParameters.getInstance().getRcpUrl());
-    /** The map used to share results and variables across step definitions. */
-    private contextMap = ContextMap.getInstance();
 
     @given(/^that the state_get_account_info RCP method is invoked against nctl$/)
     public async thatTheStateGetAccountInfoRcpMethodIsInvoked() {

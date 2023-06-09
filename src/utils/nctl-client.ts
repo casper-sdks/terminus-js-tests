@@ -31,6 +31,12 @@ export class NctlClient {
         return BigNumber.from(console.split("=")[1].trim());
     }
 
+    public getChainBlock(blockHash: string): any {
+        const json = this.exec("view_chain_block.sh", "block=" + blockHash);
+        return JSON.parse(json);
+    }
+
+
     private exec(method: string, params: string): string {
 
         // Invokes the nctl command and pipes through sed to remove all ANSI codes and return plain text
@@ -38,6 +44,4 @@ export class NctlClient {
         const stdOut = execSync(command);
         return stdOut.toString();
     }
-
-
 }
