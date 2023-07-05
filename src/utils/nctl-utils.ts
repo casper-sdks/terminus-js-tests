@@ -24,4 +24,10 @@ export class NctlUtils {
         const stdOut = execSync(command);
         return stdOut.toString();
     }
+
+    static getAccountHash(userId: number): string {
+        // TODO
+        return '' + userId;
+
+    }
 }

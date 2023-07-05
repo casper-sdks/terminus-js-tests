@@ -12,6 +12,11 @@ export class ParameterMap {
         return ParameterMap.instance;
     }
 
+    public static getCleanInstance() : ParameterMap {
+        this.instance.clear();
+        return this.instance;
+    }
+
     public put<T>(key: string, value: T) {
         this.map.set(key, value);
     }
@@ -23,5 +28,4 @@ export class ParameterMap {
     public clear() {
         this.map.clear();
     }
-
 }

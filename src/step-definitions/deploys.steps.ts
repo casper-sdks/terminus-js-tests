@@ -33,10 +33,11 @@ export class DeploysSteps {
     /** The client under test */
     private casperClient = new CasperClient(TestParameters.getInstance().getRcpUrl());
     /** The map used to share results and variables across step definitions. */
-    private parameterMap = ParameterMap.getInstance();
+    private parameterMap = ParameterMap.getCleanInstance();
 
     @given(/^that user-(\d+) initiates a transfer to user-(\d+)$/)
     public thatUserInitiatesATrans(senderId: number, receiverId: number) {
+
 
         console.info(`Given that user-${senderId} initiates a transfer to user-${receiverId}`);
 
