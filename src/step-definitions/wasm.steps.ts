@@ -1,20 +1,10 @@
 import {binding, given, then, when} from "cucumber-tsflow";
 import {ContextMap} from "../utils/context-map";
-import {
-    CasperClient,
-    CLValueBuilder,
-    CLValueParsers,
-    Contracts,
-    DeployUtil,
-    Keys,
-    RuntimeArgs,
-    StoredValue
-} from "casper-js-sdk";
+import {CasperClient, CLValueBuilder, CLValueParsers, Contracts, DeployUtil, Keys, RuntimeArgs} from "casper-js-sdk";
 import {TestParameters} from "../utils/test-parameters";
 import * as fs from "fs";
 import {expect} from "chai";
 import {Deploy} from "casper-js-sdk/dist/lib/DeployUtil";
-import {GetDeployResult} from "casper-js-sdk/dist/services";
 import {AsymmetricKey} from "casper-js-sdk/dist/lib/Keys";
 import {CLValue} from "casper-js-sdk/dist/lib/CLValue/Abstract";
 
@@ -77,12 +67,10 @@ export class WasmSteps {
             [faucetKey]
         );
 
-        await this.casperClient.putDeploy(deploy).then(deployHash => {
-            this.contextMap.put('deployHash', deployHash);
-            this.contextMap.put('deploy', deploy);
-        }).catch(e => {
-            console.log(e);
-        });
+        const deployHash = await this.casperClient.putDeploy(deploy);
+
+        this.contextMap.put('deployHash', deployHash);
+        this.contextMap.put('deploy', deploy);
 
         expect(this.contextMap.get('deployHash')).to.not.be.undefined;
     }
@@ -92,11 +80,7 @@ export class WasmSteps {
 
         console.info("the wasm has been successfully deployed");
 
-        const deploy: Deploy = this.contextMap.get('deploy');
-        let deployResult: GetDeployResult | null = null;
-        await this.casperClient.nodeClient.waitForDeploy(deploy, 300000).then(result => {
-            deployResult = result;
-        });
+        const deployResult = await this.casperClient.nodeClient.waitForDeploy(this.contextMap.get('deploy'), 300000);
 
         expect(deployResult).to.not.be.undefined;
         const execution_results = (<any>deployResult).execution_results;
@@ -109,25 +93,18 @@ export class WasmSteps {
 
         console.info(`Then the account named keys contain the ${contractName}`);
 
-        await this.casperClient.nodeClient.getStateRootHash().then(hash => {
-            this.contextMap.put('stateRootHash', hash);
-        });
-
-        const stateRootHash: string = this.contextMap.get('stateRootHash');
+        const stateRootHash = await this.casperClient.nodeClient.getStateRootHash();
         expect(stateRootHash).to.not.be.undefined;
+        this.contextMap.put('stateRootHash', stateRootHash);
 
         const faucetKey: AsymmetricKey = this.contextMap.get('faucetKey');
         const accountHash = 'account-hash-' + faucetKey.publicKey.toAccountRawHashStr();
 
-        let stateItem: StoredValue | null = null;
-
-        await this.casperClient.nodeClient.getBlockState(
+        const stateItem = await this.casperClient.nodeClient.getBlockState(
             stateRootHash,
             accountHash,
             []
-        ).then(storedValue => {
-            stateItem = storedValue;
-        });
+        );
 
         expect(stateItem).is.not.null;
 
@@ -145,15 +122,11 @@ export class WasmSteps {
         const stateRootHash: string = this.contextMap.get('stateRootHash');
         const contractHash: string = this.contextMap.get('contractHash');
 
-        let stateItem: StoredValue | null = null;
-
-        await this.casperClient.nodeClient.getBlockState(
+        const stateItem = await this.casperClient.nodeClient.getBlockState(
             stateRootHash,
             contractHash,
             [path]
-        ).then(storedValue => {
-            stateItem = storedValue;
-        });
+        );
 
         expect(stateItem).to.not.be.null;
 
@@ -161,42 +134,43 @@ export class WasmSteps {
 
         expect(clVal.data.toString()).to.be.eql(value);
         expect(clVal.clType().linksTo).to.be.eql(typeName);
-        // NOTE JS SDK does not provide bytes in the CL value so we have to convert manually
+        // NOTE JS SDK does not provide bytes in the CL value, so we have to convert manually
         const expectedBytes = Uint8Array.from(Buffer.from(hexBytes, 'hex'));
         const actualBytes = CLValueParsers.toBytes(clVal);
         expect(actualBytes.val).to.be.eql(expectedBytes);
     }
 
     @then(/^the contract dictionary item "([^"]*)" is a "([^"]*)" with a value of "([^"]*)" and bytes of "([^"]*)"$/)
-    public theContractDictionaryItemIsAWithAValueOfAndBytesOf(dictionary: string, typeName: string, value: string, hexBytes: string) {
+    public async theContractDictionaryItemIsAWithAValueOfAndBytesOf(dictionary: string,
+                                                                    typeName: string,
+                                                                    value: string,
+                                                                    hexBytes: string) {
 
-        /*
+        const stateRootHash: string = this.contextMap.get('stateRootHash');
+        const contractHash: string = this.contextMap.get('contractHash');
+        const faucetKey: AsymmetricKey = this.contextMap.get('faucetKey');
 
-    final String stateRootHash = this.contextMap.get("stateRootHash");
-    final String contractHash = this.contextMap.get("contractHash");
-    final Ed25519PrivateKey faucetPrivateKey = this.contextMap.get("faucetPrivateKey");
+        const balanceKey = Buffer.from(
+            CLValueParsers.toBytes(CLValueBuilder.key(faucetKey.publicKey)).unwrap()
+        ).toString('base64');
 
-    final CLValuePublicKey clValuePublicKey = new CLValuePublicKey(PublicKey.fromAbstractPublicKey(faucetPrivateKey.derivePublicKey()));
-    final byte[] decode = Hex.decode(clValuePublicKey.getBytes());
-    final byte[] encode = Base64.getEncoder().encode(decode);
-    final String balanceKey = Hex.encode(encode);
+        const storedValue = await this.casperClient.nodeClient.getDictionaryItemByName(
+            stateRootHash,
+            contractHash,
+            dictionary,
+            balanceKey
+        );
 
-    final ContractNamedKeyDictionaryIdentifier identifier = ContractNamedKeyDictionaryIdentifier
-        .builder()
-        .contractNamedKey(ContractNamedKey.builder().dictionaryItemKey(contractHash).dictionaryName(dictionary).key(balanceKey).build())
-        .build();
-    final DictionaryData stateDictionaryItem = this.casperService.getStateDictionaryItem(
-        stateRootHash,
-        identifier
-    );
+        expect(storedValue).to.not.be.undefined;
 
-    final AbstractCLValue clValue = (AbstractCLValue) stateDictionaryItem.getStoredValue().getValue();
-    assertThat(clValue.getClType().getTypeName(), is(typeName));
+        const clValue: CLValue = (storedValue as any).CLValue;
 
-    final Object expectedValue = convertToCLTypeValue(typeName, value);
-    assertThat(clValue.getValue(), is(expectedValue));
-
-    assertThat(clValue.getBytes(), is(hexBytes));*/
+        expect(clValue.data.toString()).to.be(value);
+        expect(clValue.clType().linksTo).to.be.eql(typeName);
+        // NOTE JS SDK does not provide bytes in the CL value, so we have to convert manually
+        const expectedBytes = Uint8Array.from(Buffer.from(hexBytes, 'hex'));
+        const actualBytes = CLValueParsers.toBytes(clValue);
+        expect(actualBytes.val).to.be.eql(expectedBytes);
     }
 
 
@@ -230,14 +204,10 @@ export class WasmSteps {
 
         const signedDeploy = deploy.sign([faucetKey]);
 
-        let deploy_hash: any = null;
-        await this.casperClient.putDeploy(signedDeploy).then(hash => {
-            deploy_hash = hash;
-        })
+        const deployHash = await this.casperClient.putDeploy(signedDeploy);
+        expect(deployHash).to.not.be.undefined;
 
-        expect(deploy_hash).to.not.be.undefined;
-
-        this.contextMap.put('deploy', signedDeploy)
+        this.contextMap.put('deploy', signedDeploy);
     }
 
     @then(/^the contract invocation deploy is successful$/, undefined, 300000)
@@ -246,12 +216,7 @@ export class WasmSteps {
         console.info(`Then the contract invocation deploy is successful`);
 
         const deploy: Deploy = this.contextMap.get('deploy');
-        let deployResult: GetDeployResult | null = null;
-
-        await this.casperClient.nodeClient.waitForDeploy(deploy, 300000).then(result => {
-            deployResult = result;
-        });
-
+        const deployResult = await this.casperClient.nodeClient.waitForDeploy(deploy, 300000);
         expect(deployResult).to.not.be.undefined;
         const execution_results = (<any>deployResult).execution_results;
         expect(execution_results).to.have.length.gt(0);
