@@ -30,7 +30,7 @@
     "cucumber-tsflow": "^4.0.0-rc.7",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.4",
-    "casper-js-sdk": "^2.12.1"
+    "casper-js-sdk": "^2.13.3"
   },
   "dependencies": {
 
