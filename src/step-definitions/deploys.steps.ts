@@ -18,7 +18,7 @@ import {AsymmetricKey} from "casper-js-sdk/dist/lib/Keys";
 import {CLValue} from "casper-js-sdk/dist/lib/CLValue";
 import {TestParameters} from "../utils/test-parameters";
 import {EventUtils} from "../utils/event-utils";
-
+import {ClTypeUtils} from "../utils/cl-type-utils";
 
 /**
  * Step definitions for the deploys feature.
@@ -194,7 +194,7 @@ export class DeploysSteps {
         expect(actualCost).to.eql(cost);
     }
 
-    @then(/^the deploy has a payment amount of (\d+)$/)
+    @then( /^the deploy has a payment amount of (\d+)$/)
     public theDeployHasAPaymentAmountOf(amount: number) {
 
         console.info(`Then the deploy has a payment amount of ${amount}`);
@@ -295,7 +295,7 @@ export class DeploysSteps {
         console.info(`the deploy session has a ${argName} argument value of type ${argType}`);
 
         const argByName = this.getDeployArgument(argName);
-        let expectedClType = this.getCLType(argType);
+        let expectedClType = ClTypeUtils.getCLType(argType);
         const actualArgType = argByName?.clType().tag;
         expect(actualArgType).to.eql(expectedClType)
     }
@@ -323,17 +323,5 @@ export class DeploysSteps {
         return argByName as CLValue;
     }
 
-    private getCLType(typeName: string): CLTypeTag {
 
-        switch (typeName) {
-            case U512_TYPE:
-                return CLTypeTag.U512;
-            case PUBLIC_KEY_TYPE:
-                return CLTypeTag.PublicKey;
-            case OPTION_TYPE:
-                return CLTypeTag.Option;
-            default:
-                assert.fail(`Invalid typeName: ${typeName}`);
-        }
-    }
 }
