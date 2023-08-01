@@ -1,9 +1,9 @@
 import {ContextMap} from "../utils/context-map";
-import {CasperClient, CLTypeTag, CLValueParsers, DeployUtil, Keys, NamedArg} from "casper-js-sdk";
+import {CasperClient, CLTypeTag, CLValueParsers, DeployUtil, JsonDeploy, Keys, NamedArg} from "casper-js-sdk";
 import {CLValueFactory} from "../utils/cl-value.factory";
 import {ClTypeUtils} from "../utils/cl-type-utils";
 import {CLValue} from "casper-js-sdk/dist/lib/CLValue/Abstract";
-import {expect} from "chai";
+import {assert, expect} from "chai";
 import {binding, given, then, when} from "cucumber-tsflow";
 import {BigNumber} from "@ethersproject/bignumber";
 import {TestParameters} from "../utils/test-parameters";
@@ -85,17 +85,7 @@ export class ClValuesSteps {
     public async theDeployIsPutOnChain() {
 
         const deploy: Deploy = this.contextMap.get("putDeploy");
-
         this.contextMap.put("deployResult", await this.casperClient.putDeploy(deploy));
-
-        /*
-         Deploy deploy = contextMap.get(PUT_DEPLOY);
-
-         DeployResult deployResult = casperService.putDeploy(deploy);
-        assertThat(deployResult.getDeployHash(), is(notNullValue()));
-        contextMap.put(DEPLOY_RESULT, deployResult);
-
-         */
     }
 
     @then(/^the deploy has successfully executed$/, undefined, 300000)
@@ -119,27 +109,14 @@ export class ClValuesSteps {
     @then(/^the deploys NamedArgument "([^"]*)" has a value of "([^"]*)" and bytes of "([^"]*)"$/)
     public theDeploysNamedArgumentHasAValueOfAndBytesOf(name: string, strValue: string, hexBytes: string) {
 
-        const deployResult: [Deploy, GetDeployResult] = this.contextMap.get('getDeploy');
-        const deploy = deployResult[0];
-        let arg = deploy.session.getArgByName(name);
+        let arg = this.getNamedArgument(name);
+        expect(arg[1].bytes).to.be.eql(hexBytes);
 
-        expect(arg).to.not.be.undefined;
-        /*
-
-         DeployData deploy = this.contextMap.get(GET_DEPLOY);
-         Optional<NamedArg<?>> optionalNamedArg = deploy.getDeploy().getSession().getArgs().stream().filter(namedArg -> name.equals(namedArg.getType())).findFirst();
-        assertThat(optionalNamedArg.isPresent(), is(true));
-
-         Object value = CLTypeUtils.convertToCLTypeValue(name, strValue);
-
-         NamedArg<?> namedArg = optionalNamedArg.get();
-        assertThat(namedArg.getClValue().getValue(), is(value));
-        assertThat(namedArg.getClValue().getBytes(), is(hexBytes));
-        assertThat(namedArg.getClValue().getClType().getTypeName(), is(name));
-        assertThat(namedArg.getClValue().getBytes(), is(hexBytes));
-         */
-
+        const expectedValue: any = ClTypeUtils.convertToCLTypeValue(name, strValue)
+        expect(arg[1].parsed).to.be.eql(expectedValue);
+        expect(arg[1].cl_type).to.be.eql(name);
     }
+
 
     @given(/^that the CL complex value of type "([^"]*)" with an internal types of "([^"]*)" values of "([^"]*)"$/)
     public thatTheCLComplexValueOfTypeWithAnInternalTypesOfValuesOf(type: string, innerTypes: string, innerValues: string) {
@@ -152,127 +129,101 @@ export class ClValuesSteps {
 
 
     @then(/^the deploys NamedArgument Complex value "([^"]*)" has internal types of "([^"]*)" and values of "([^"]*)" and bytes of "([^"]*)"$/)
-    public theDeploysNamedArgumentComplexValueHasInternalValuesOfAndBytesOf(name: string, types: string, values: string, bytes: string) {
-        /*
-         DeployData deploy = this.contextMap.get(GET_DEPLOY);
-         Optional<NamedArg<?>> optionalNamedArg = deploy.getDeploy().getSession().getArgs().stream().filter(namedArg -> name.equals(namedArg.getType())).findFirst();
-        assertThat(optionalNamedArg.isPresent(), is(true));
+    public theDeploysNamedArgumentComplexValueHasInternalValuesOfAndBytesOf(name: string, types: string, values: string, hexBytes: string) {
 
-         NamedArg<?> namedArg = optionalNamedArg.get();
+        let arg: any = this.getNamedArgument(name);
 
-        switch (CLTypeData.getTypeByName(namedArg.getType())) {
-            case LIST:
-                assertList((CLValueList) namedArg.getClValue(), types, values);
-                break;
-
-            case MAP:
-                assertMap((CLValueMap) namedArg.getClValue(), types, values);
-                break;
-
-            case OPTION:
-                assertOption((CLValueOption) namedArg.getClValue(), types, values);
-                break;
-
-            case TUPLE1:
-                assertTupleOne((CLValueTuple1) namedArg.getClValue(), types, values);
-                break;
-
-            case TUPLE2:
-                assertTupleTwo((CLValueTuple2) namedArg.getClValue(), types, values);
-                break;
-
-            case TUPLE3:
-                assertTupleThree((CLValueTuple3) namedArg.getClValue(), types, values);
-                break;
-            default:
-                throw new IllegalArgumentException("Not a supported  complex type " + namedArg.getType());
+        expect(arg).to.not.be.undefined;
+        expect(arg[1].bytes).to.be.eql(hexBytes);
+        if (!ClTypeUtils.isComplexType(name)) {
+            expect(arg[1].cl_type).to.be.eql(name);
+        } else {
+            expect(arg[1].cl_type[name]).to.not.be.undefined;
         }
 
-        assertThat(namedArg.getClValue().getBytes(), is(bytes));
-
-         */
+        switch (ClTypeUtils.getCLType(name)) {
+            case CLTypeTag.List:
+                this.assertList(arg[1], types, values);
+                break;
+            case CLTypeTag.Map:
+                this.assertMap(arg[1], types, values);
+                break;
+            case CLTypeTag.Option:
+                this.assertOption(arg[1], types, values);
+                break;
+            case CLTypeTag.Tuple1:
+                this.assertTupleOne(arg[1], types, values);
+                break;
+            case CLTypeTag.Tuple2:
+                this.assertTupleTwo(arg[1], types, values);
+                break;
+            case CLTypeTag.Tuple3:
+                this.assertTupleThree(arg[1], types, values);
+                break;
+            default:
+                assert.fail(`Invalid typeName: ${name}`);
+        }
     }
 
     private assertList(clValue: any, types: string, values: string) {
 
-        /*
-         CLValueList complexValue = (CLValueList) this.cLValueFactory.createComplexValue(CLTypeData.LIST, getInnerClTypeData(types), Arrays.asList(values.split(",")));
+        const complexValue = this.cLValueFactory.createComplexValue(CLTypeTag.List, this.getInnerClTypeData(types), values.split(','));
 
-         List<? extends AbstractCLValue<?, ?>> value = clValue.getValue();
-        assertThat(value, hasSize(5));
+        expect(clValue.parsed.length).to.be.eql(complexValue.value().length);
 
-         Iterator<? extends AbstractCLValue<?, ?>> iterator = complexValue.getValue().iterator();
-
-        for (AbstractCLValue<?, ?> abstractCLValue : value) {
-            assertClValues(abstractCLValue, iterator.next());
+        for (let i = 0; i < clValue.parsed.length; i++) {
+           expect(clValue.parsed[i]).to.be.eql(complexValue.value()[i].value());
         }
-
-         */
     }
 
     private assertMap(clValue: any, types: string, values: string) {
-        /*
-                 CLValueMap complexValue = (CLValueMap) this.cLValueFactory.createComplexValue(CLTypeData.MAP, getInnerClTypeData(types), Arrays.asList(values.split(",")));
 
-                 Set<? extends Map.Entry<? extends AbstractCLValue<?, ?>, ? extends AbstractCLValue<?, ?>>> thatEntries = complexValue.getValue().entrySet();
-                 Iterator<? extends Map.Entry<? extends AbstractCLValue<?, ?>, ? extends AbstractCLValue<?, ?>>> iterEntries = clValue.getValue().entrySet().iterator();
+        const complexValue = this.cLValueFactory.createComplexValue(CLTypeTag.Map, this.getInnerClTypeData(types), values.split(','));
 
-                for (Map.Entry<? extends AbstractCLValue<?, ?>, ? extends AbstractCLValue<?, ?>> entry : thatEntries) {
+        expect(clValue.parsed.length).to.be.eql(complexValue.value().length);
 
-                     Map.Entry<? extends AbstractCLValue<?, ?>, ? extends AbstractCLValue<?, ?>> next = iterEntries.next();
-
-                    assertClValues(entry.getKey(), next.getKey());
-                    assertClValues(entry.getValue(), next.getValue());
-                }
-
-         */
+        for (let i = 0; i < clValue.parsed.length; i++) {
+            expect(clValue.parsed[i].value).to.be.eql(complexValue.value()[i][1].value().toString());
+        }
     }
 
     private assertTupleThree(clValue: any, types: string, values: string) {
-        /*
-                 CLValueTuple3 complexValue = (CLValueTuple3) this.cLValueFactory.createComplexValue(CLTypeData.TUPLE3, getInnerClTypeData(types), Arrays.asList(values.split(",")));
-
-                assertClValues(clValue.getValue().getValue0(), complexValue.getValue().getValue0());
-                assertClValues(clValue.getValue().getValue1(), complexValue.getValue().getValue1());
-                assertClValues(clValue.getValue().getValue2(), complexValue.getValue().getValue2());
-
-         */
+        this.assertTuple(clValue, types, values, CLTypeTag.Tuple3);
     }
 
     private assertTupleTwo(clValue: any, types: string, values: string) {
-        /*
-                 CLValueTuple2 complexValue = (CLValueTuple2) this.cLValueFactory.createComplexValue(CLTypeData.TUPLE2, getInnerClTypeData(types), Arrays.asList(values.split(",")));
-
-                assertClValues(clValue.getValue().getValue0(), complexValue.getValue().getValue0());
-                assertClValues(clValue.getValue().getValue1(), complexValue.getValue().getValue1());
-
-         */
+        this.assertTuple(clValue, types, values, CLTypeTag.Tuple2);
     }
 
     private assertTupleOne(clValue: any, types: string, values: string) {
-        /*
-                 AbstractCLValue<?, ?> innerValue = this.cLValueFactory.createValue(CLTypeData.getTypeByName(types), values);
-                assertClValues(clValue.getValue().getValue0(), innerValue);
+        this.assertTuple(clValue, types, values, CLTypeTag.Tuple1);
+    }
 
-         */
+    private assertTuple(clValue: any, types: string, values: string, tag: CLTypeTag) {
+
+        let complexValue = this.cLValueFactory.createComplexValue(tag, this.getInnerClTypeData(types), values.split(','));
+
+        let len = 1;
+        if (tag == CLTypeTag.Tuple2) {
+            len = 2;
+        } else if (tag == CLTypeTag.Tuple3) {
+            len = 3;
+        }
+
+        for (let i = 0; i < len; i++) {
+            expect(clValue.parsed[i].toString()).to.be.eql(complexValue.value()[i].value().toString());
+        }
     }
 
     private assertOption(clValue: any, types: string, values: string) {
-        /*
-                 AbstractCLValue<?, ?> innerValue = this.cLValueFactory.createValue(CLTypeData.getTypeByName(types), values);
-                assertThat(clValue.getValue().isPresent(), is(true));
-                assertClValues(clValue.getValue().get(), innerValue);
 
-         */
+        const innerValue = this.cLValueFactory.createValue(ClTypeUtils.getCLType(types), values);
+
+        expect(innerValue).to.not.be.undefined;
+        expect(clValue.parsed).to.be.eql(innerValue.value());
+        expect(clValue.cl_type.Option).to.not.be.undefined;
+        expect(clValue.cl_type.Option).to.be.eql(types);
     }
-
-    private assertClValues(actual: any, expected: any) {
-        /* assertThat(actual.getValue(), is(expected.getValue()));
-            assertThat(actual.getClType(), is(expected.getClType()));
-
-     */
-    }
-
 
     private addValueToContext(value: CLValue) {
 
@@ -283,8 +234,8 @@ export class ClValuesSteps {
             clValues = new Array<NamedArg>();
             this.contextMap.put("clValues", clValues);
         }
-
-        clValues.push(new NamedArg(value.clType().tag.toString(), value));
+        const name = CLTypeTag[value.clType().tag];
+        clValues.push(new NamedArg(name, value));
     }
 
     private getInnerClTypeData(innerTypes: string): CLTypeTag[] {
@@ -296,5 +247,14 @@ export class ClValuesSteps {
         })
 
         return types;
+    }
+
+    private getNamedArgument(name: string): any {
+        const deployResult: [Deploy, GetDeployResult] = this.contextMap.get('getDeploy');
+        const deploy: JsonDeploy = deployResult[1].deploy;
+        let args: [] = (deploy.session.Transfer as any).args;
+        let arg: any = args.find(arg => arg[0] == name);
+        expect(arg).to.not.be.undefined;
+        return arg;
     }
 }

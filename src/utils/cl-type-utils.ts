@@ -73,4 +73,47 @@ export class ClTypeUtils {
                 assert.fail(`Invalid typeName: ${typeName}`);
         }
     }
+
+    public static convertToCLTypeValue(typeName: string, strValue: string): any {
+        switch (ClTypeUtils.getCLType(typeName)) {
+
+            case CLTypeTag.Bool:
+                return 'true' === strValue;
+            case CLTypeTag.I32:
+            case CLTypeTag.I64:
+            case CLTypeTag.U8:
+            case CLTypeTag.U32:
+            case CLTypeTag.U64:
+            case CLTypeTag.U128:
+                return Number.parseInt(strValue);
+
+            case CLTypeTag.PublicKey:
+            case CLTypeTag.String:
+            case CLTypeTag.U256:
+                return strValue;
+
+            case CLTypeTag.URef:
+                return `uref-${strValue}-007`;
+
+            default:
+                assert.fail(`Invalid typeName: ${typeName}`);
+        }
+
+    }
+
+    static isComplexType(typeName: string) {
+
+        switch (ClTypeUtils.getCLType(typeName)) {
+            case CLTypeTag.List:
+            case CLTypeTag.Map:
+            case CLTypeTag.Option:
+            case CLTypeTag.Tuple1:
+            case CLTypeTag.Tuple2:
+            case CLTypeTag.Tuple3:
+                return true;
+
+            default:
+                return false;
+        }
+    }
 }
