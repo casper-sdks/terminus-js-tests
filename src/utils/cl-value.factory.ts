@@ -89,7 +89,6 @@ export class CLValueFactory {
 
     private buildMap(innerValues: CLValue[]): any {
         let map = [];
-        let i = 0;
         for (let i = 0; i < innerValues.length; i++) {
             map.push([new CLString('' + i), innerValues[i]]);
         }
