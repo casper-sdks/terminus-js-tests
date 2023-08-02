@@ -1,6 +1,6 @@
 import * as http from "http";
 
-export class SimpleRcpClient {
+export class SimpleRpcClient {
 
     public constructor(private hostname: string, private port: number) {
 
@@ -14,13 +14,17 @@ export class SimpleRcpClient {
      * @throws Exception if an IO error occurs
      */
     public async getAuctionInfoByHash(hash: string): Promise<any> {
-        //return this.curl("state_get_auction_info", "[{\"Hash\":  \"" + hash + "\"}]");
-        return this.rpc("state_get_auction_info", "[{\"Hash\":  \"" + hash + "\"}]");
+        return this.rpc("state_get_auction_info", `[{"Hash":  "${hash}"}]`);
+    }
+
+    public async getEraSummary(hash: string): Promise<any> {
+        return this.rpc("chain_get_era_summary", `[{"Hash":  "${hash}"}]`);
     }
 
     private async rpc(method: string, params: string): Promise<any> {
 
-        const payload = "{\"id\":\"" + new Date().getTime() + "\",\"jsonrpc\":\"2.0\",\"method\":\"" + method + "\",\"params\":" + params + "}";
+        const id = new Date().getTime();
+        const payload = `{"id":"${id}","jsonrpc":"2.0","method":"${method}","params":${params}}`;
 
         const options = {
             hostname: this.hostname,
@@ -28,7 +32,8 @@ export class SimpleRcpClient {
             path: '/rpc',
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Content-Length':  + payload.length
             }
         };
 
@@ -57,6 +62,4 @@ export class SimpleRcpClient {
             req.end();
         });
     }
-
-
 }
