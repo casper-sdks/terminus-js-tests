@@ -1,5 +1,12 @@
 import {binding, given, then} from "cucumber-tsflow";
 import {ContextMap} from "../utils/context-map";
+import {assert, expect} from "chai";
+import {CasperClient, DeployUtil, Keys} from "casper-js-sdk";
+import {TestParameters} from "../utils/test-parameters";
+import {BigNumber} from "@ethersproject/bignumber";
+import {AsymmetricKey} from "casper-js-sdk/dist/lib/Keys";
+import {GetBlockResult, GetDeployResult} from "casper-js-sdk/dist/services/CasperServiceByJsonRPC";
+import {Deploy} from "casper-js-sdk/dist/lib/DeployUtil";
 
 /**
  * The class that implements the steps for the deploys_generated_keys.feature.
@@ -8,159 +15,145 @@ import {ContextMap} from "../utils/context-map";
  */
 @binding()
 export class DeploysGeneratedKeysSteps {
+
+    private casperClient = new CasperClient(TestParameters.getInstance().getRcpUrl());
     private contextMap = ContextMap.getInstance();
 
     @given(/^that a "([^"]*)" sender key is generated$/)
     public thatSenderKeyIsGenerated(algo: string) {
 
-        console.info(`that a ${algo} sender key is generated`);
-        /*
-             AbstractPrivateKey sk;
-             AbstractPublicKey pk;
+        console.info(`Given that a ${algo} sender key is generated`);
 
-            if (algo.equals("Ed25519")) {
-            sk = CasperKeyHelper.createRandomEd25519Key();
-            pk = CasperKeyHelper.derivePublicKey((Ed25519PrivateKey) sk);
-        } else {
-            sk = CasperKeyHelper.createRandomSecp256k1Key();
-            pk = CasperKeyHelper.derivePublicKey((Secp256k1PrivateKey) sk);
+        let key = this.generateKey(algo);
 
-
-        }
-
-        assertThat(sk, is(notNullValue()));
-        assertThat(pk, is(notNullValue()));
-
-        byte[] msg = "this is the sender".getBytes();
-        byte[] signature = sk.sign(msg);
-        assertTrue(pk.verify(msg, signature));
-
-        assertThat(sk.getKey(), is(notNullValue()));
-        assertThat(pk.getKey(), is(notNullValue()));
-
-        contextMap.put(SENDER_KEY_SK, sk);
-        contextMap.put(SENDER_KEY_PK, pk);
-        */
+        this.contextMap.put('senderKey', key);
     }
-
 
     @given(/^that a "([^"]*)" receiver key is generated$/)
     public thatAReceiverKeyIsGenerated(algo: string) {
 
-        console.info(`that a ${algo} receiver key is generated`);
-        /*
-             AbstractPublicKey pk;
-             AbstractPrivateKey sk;
+        console.info(`Given that a ${algo} receiver key is generated`);
 
-            if (algo.equals("Ed25519")) {
-                sk = CasperKeyHelper.createRandomEd25519Key();
-                pk = CasperKeyHelper.derivePublicKey((Ed25519PrivateKey) sk);
-            } else {
-                sk = CasperKeyHelper.createRandomSecp256k1Key();
-                pk = CasperKeyHelper.derivePublicKey((Secp256k1PrivateKey) sk);
-            }
+        let key = this.generateKey(algo);
 
-            byte[] msg = "this is the receiver".getBytes();
-            byte[] signature = sk.sign(msg);
-            assertTrue(pk.verify(msg, signature));
-
-            assertThat(sk.getKey(), is(notNullValue()));
-            assertThat(pk.getKey(), is(notNullValue()));
-
-            contextMap.put(RECEIVER_KEY, pk);
-        */
+        this.contextMap.put('receiverKey', key);
     }
 
     @then(/^fund the account from the faucet user with a transfer amount of (\d+) and a payment amount of (\d+)$/)
-    public fundTheAccountFromTheFaucetUserWithATransferAmountOfAndAPaymentAmountOf(transferAmount: number, paymentAmount: number) {
-        console.info(`fund the account from the faucet user with a transfer amount of ${transferAmount} and a payment amount of ${paymentAmount}`);
-        /*
-             URL faucetPrivateKeyUrl = AssetUtils.getFaucetAsset(1, "secret_key.pem");
-            assertThat(faucetPrivateKeyUrl, is(notNullValue()));
-             Ed25519PrivateKey privateKey = new Ed25519PrivateKey();
-            privateKey.readPrivateKey(faucetPrivateKeyUrl.getFile());
+    public async fundTheAccountFromTheFaucetUserWithATransferAmountOfAndAPaymentAmountOf(transferAmount: number, paymentAmount: number) {
 
-            contextMap.put(TRANSFER_AMOUNT, transferAmount);
-            contextMap.put(PAYMENT_AMOUNT, paymentAmount);
+        console.info(`Then fund the account from the faucet user with a transfer amount of ${transferAmount} and a payment amount of ${paymentAmount}`);
 
-            doDeploy(privateKey, contextMap.get(SENDER_KEY_PK));
-        */
+        const faucetKey = this.casperClient.loadKeyPairFromPrivateFile(
+            `./assets/net-1/faucet/secret_key.pem`,
+            Keys.SignatureAlgorithm.Ed25519
+        );
+
+        expect(faucetKey).to.not.be.undefined;
+
+        this.contextMap.put('faucetKey', faucetKey);
+
+        await this.doDeploy(faucetKey, this.contextMap.get('senderKey'), transferAmount, paymentAmount);
     }
 
-    @then(/^wait for a block added event with a timeout of (\d+) seconds$/)
-    public waitForABlockAddedEventWithATimeoutOfSeconds(timeout: number) {
+    @then(/^wait for a block added event with a timeout of (\d+) seconds$/, undefined, 300000)
+    public async waitForABlockAddedEventWithATimeoutOfSeconds(timeout: number) {
 
         console.info(`Then wait for a block added event with a timeout of ${timeout} seconds`);
-        /* 
-     
-         final DeployResult deployResult = contextMap.get(DEPLOY_RESULT);
-     
-         final ExpiringMatcher<Event<BlockAdded>> matcher = (ExpiringMatcher<Event<BlockAdded>>) eventHandler.addEventMatcher(
-             EventType.MAIN,
-         hasTransferHashWithin(
-             deployResult.getDeployHash(),
-         blockAddedEvent -> contextMap.put(LAST_BLOCK_ADDED, blockAddedEvent.getData())
-     )
-     );
-     
-         assertThat(matcher.waitForMatch(timeout), is(true));
-     
-         eventHandler.removeEventMatcher(EventType.MAIN, matcher);
-     
-         final Digest matchingBlockHash = ((BlockAdded) contextMap.get(LAST_BLOCK_ADDED)).getBlockHash();
-         assertThat(matchingBlockHash, is(notNullValue()));
-     
-         final JsonBlockData block = CasperClientProvider.getInstance().getCasperService().getBlock(new HashBlockIdentifier(matchingBlockHash.toString()));
-         assertThat(block, is(notNullValue()));
-         final List<String> transferHashes = block.getBlock().getBody().getTransferHashes();
-         assertThat(transferHashes, hasItem(deployResult.getDeployHash()));
-     */
+
+        const result: GetDeployResult = await this.casperClient.nodeClient.waitForDeploy(this.contextMap.get('deploy'), timeout * 1000);
+
+        expect(result).to.not.be.undefined;
+
+        expect(result.execution_results[0].result.Success).to.not.be.undefined;
+
+        const blockHash = result.execution_results[0].block_hash;
+
+        expect(blockHash).to.not.be.undefined;
+
+        this.contextMap.put('blockHash', blockHash);
     }
 
     @then(/^transfer to the receiver account the transfer amount of (\d+) and the payment amount of (\d+)$/)
-    public transferToTheReceiverAccountTheTransferAmountOfAndThePaymentAmountOf(transferAmount: number, paymentAmount: number) {
-        console.info(`transfer to the receiver account the transfer amount of ${transferAmount} and the payment amount of ${paymentAmount}`);
-        /*
-            contextMap.put(TRANSFER_AMOUNT, transferAmount);
-            contextMap.put(PAYMENT_AMOUNT, paymentAmount);
+    public async transferToTheReceiverAccountTheTransferAmountOfAndThePaymentAmountOf(transferAmount: number, paymentAmount: number) {
+        console.info(`Then transfer to the receiver account the transfer amount of ${transferAmount} and the payment amount of ${paymentAmount}`);
 
-            doDeploy(contextMap.get(SENDER_KEY_SK), contextMap.get(RECEIVER_KEY));
-        */
+        await this.doDeploy(this.contextMap.get('senderKey'), this.contextMap.get('receiverKey'), transferAmount, paymentAmount);
     }
 
-    @then(/^the returned block header proposer contains the "([^"]*)" algo$/)
-    public theReturnedBlockHeaderProposerContainsTheAlgo(algo: string) {
-        console.info(`the returned block header proposer contains the ${algo} algo`);
-        /*
-             Digest matchingBlockHash = ((BlockAdded) contextMap.get(LAST_BLOCK_ADDED)).getBlockHash();
-             JsonBlockData block = CasperClientProvider.getInstance().getCasperService().getBlock(new HashBlockIdentifier(matchingBlockHash.toString()));
+    @then(/^the transfer approvals signer contains the "([^"]*)" algo$/)
+    public async theReturnedBlockHeaderProposerContainsTheAlgo(algo: string) {
+        console.info(`Then the returned block header proposer contains the ${algo} algo`);
 
-            assertThat(block.getBlock().getBody().getProposer().getTag().toString().toUpperCase(), is(algo.toUpperCase(Locale.ROOT)));
-        */
+        const blockHash: string = this.contextMap.get('blockHash');
+
+        const blockInfo: GetBlockResult = await this.casperClient.nodeClient.getBlockInfo(blockHash);
+
+        expect(blockInfo).to.not.be.undefined;
+
+        const transferHash =  Uint8Array.from(Buffer.from((blockInfo.block as any).body.transfer_hashes[0], 'hex'));
+        const transfer: Deploy = this.contextMap.get('deploy');
+
+        expect(transferHash).to.be.eql(transfer.hash);
+
+        const algoBytes = transfer.approvals[0].signer.substring(0,2);
+
+        if ('Ed25519' === algo) {
+            expect(algoBytes).to.be.eql('01');
+        } else if ('Secp256k1' === algo) {
+            expect(algoBytes).to.be.eql('02');
+        } else {
+            assert.fail(`Invalid algorithm: ${algo}`);
+        }
     }
 
-    private doDeploy(sk: any, pk: any) {
-        /*
-             Deploy deploy = CasperTransferHelper.buildTransferDeploy(
-                sk,
-                PublicKey.fromAbstractPublicKey(pk),
-                BigInteger.valueOf(contextMap.get(TRANSFER_AMOUNT)),
-                "casper-net-1",
-                Math.abs(new Random().nextLong()),
-                BigInteger.valueOf(contextMap.get(PAYMENT_AMOUNT)),
-                1L,
-                Ttl.builder().ttl("30m").build(),
-                new Date(),
-                new ArrayList<>());
+    private async doDeploy(senderKeyPair: AsymmetricKey, receiverKey: AsymmetricKey, amount: number, payment: number) {
 
-            contextMap.put(PUT_DEPLOY, deploy);
+        const id = BigNumber.from(Math.round(Math.random()));
+        const gasPrice: number = 1;
+        const ttl = DeployUtil.dehumanizerTTL('30m');
 
-             CasperService casperService = CasperClientProvider.getInstance().getCasperService();
+        const transfer = DeployUtil.ExecutableDeployItem.newTransfer(BigNumber.from(amount), receiverKey.publicKey, undefined, id);
+        expect(transfer).to.not.be.undefined;
 
-            contextMap.put(DEPLOY_RESULT, casperService.putDeploy(deploy));
-        */
+        const standardPayment = DeployUtil.standardPayment(BigNumber.from(payment));
+        expect(standardPayment).to.not.be.undefined;
+
+        const deployParams = new DeployUtil.DeployParams(senderKeyPair.publicKey, 'casper-net-1', gasPrice, ttl);
+        const deploy = DeployUtil.makeDeploy(deployParams, transfer, standardPayment);
+
+        this.casperClient.signDeploy(deploy, senderKeyPair);
+
+        let deployHash = await this.casperClient.putDeploy(deploy);
+        expect(deployHash).to.not.be.null;
+
+        this.contextMap.put("deployResult", deployHash);
+
+        this.contextMap.put('deploy', deploy);
+    }
+
+    private generateKey(algo: string): AsymmetricKey {
+
+        let key: Keys.AsymmetricKey;
+
+        switch (algo) {
+            case "Ed25519":
+                key = Keys.Ed25519.new();
+                break;
+            case "Secp256k1":
+                key = Keys.Secp256K1.new();
+                break;
+            default:
+                assert.fail(`Invalid algorithm: ${algo}`);
+        }
+
+        expect(key).to.not.be.undefined;
+        expect(key.privateKey).to.not.be.undefined;
+        expect(key.publicKey).to.not.be.undefined;
+
+        const msg = Uint8Array.from(Buffer.from('this is the sender', 'utf-8'));
+        const signed = key.sign(msg);
+        expect(key.verify(signed, msg)).to.be.true;
+        return key;
     }
 }
-
-
-
