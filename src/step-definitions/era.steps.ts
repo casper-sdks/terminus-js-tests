@@ -76,7 +76,7 @@ export class EraSteps {
 
         console.info("And the merkle proof of the returned era summary is equal to the merkle proof of the returned test node era summary");
 
-        // NOT SUPPORTED IN JavaScript SDK
+        throw 'NOT SUPPORTED IN JavaScript SDK';
 
         /*
         const eraSummary: EraSummary = this.contextMap.get("eraSummary");
@@ -102,7 +102,7 @@ export class EraSteps {
 
         console.info("And the delegators data of the returned era summary is equal to the delegators data of the returned test node era summary");
 
-        throw "NOT SUPPORTED IN JavaScript SDK";
+        throw 'NOT SUPPORTED IN JavaScript SDK';
     }
 
     @then(/^the validators data of the returned era summary is equal to the validators data of the returned test node era summary$/)
@@ -110,6 +110,6 @@ export class EraSteps {
 
         console.info("And the validators data of the returned era summary is equal to the validators data of the returned test node era summary");
 
-        throw "NOT SUPPORTED IN JavaScript SDK";
+        throw 'NOT SUPPORTED IN JavaScript SDK';
     }
 }
