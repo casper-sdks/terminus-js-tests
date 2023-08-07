@@ -174,10 +174,10 @@ export class WasmSteps {
     }
 
 
-    @when(/^the contract entry point is invoked with a transfer amount of "([^"]*)"$/)
-    public async theContractEntryPointIsInvokedWithATransferAmountOf(transferAmount: string) {
+    @when(/^the contract entry point is invoked by hash with a transfer amount of "([^"]*)"$/)
+    public async theContractEntryPointIsInvokedByHashWithATransferAmountOf(transferAmount: string) {
 
-        console.info(`When the contract entry point is invoked with a transfer amount of ${transferAmount}`);
+        console.info(`When the contract entry point is invoked by hash with a transfer amount of ${transferAmount}`);
 
         const recipient = Keys.Ed25519.new().publicKey;
 
@@ -221,5 +221,102 @@ export class WasmSteps {
         const execution_results = (<any>deployResult).execution_results;
         expect(execution_results).to.have.length.gt(0);
         expect(execution_results[0].result.Success).to.not.be.undefined;
+    }
+
+    @when(/^the the contract is invoked by name "([^"]*)" and a transfer amount of "([^"]*)"$/)
+    public async theTheContractIsInvokedByNameWithATransferAmountOf(contractName: string, transferAmount: string) {
+        console.info(`When the contract entry point is invoked with a transfer amount of ${transferAmount}`);
+
+        const recipient = Keys.Ed25519.new().publicKey;
+        const faucetKey: AsymmetricKey = this.contextMap.get('faucetKey');
+        const ttl = DeployUtil.dehumanizerTTL("30m");
+
+        const transferArgs = RuntimeArgs.fromMap({
+            recipient: CLValueBuilder.byteArray(recipient.toAccountHash()),
+            amount: CLValueBuilder.u256(transferAmount)
+        });
+
+        const deploy = DeployUtil.makeDeploy(
+            new DeployUtil.DeployParams(faucetKey.publicKey, "casper-net-1", 1, ttl),
+
+            DeployUtil.ExecutableDeployItem.newStoredContractByName(
+                contractName,
+                'transfer',
+                transferArgs
+            ),
+            DeployUtil.standardPayment("2500000000")
+        );
+
+        const signedDeploy = deploy.sign([faucetKey]);
+
+        const deployHash = await this.casperClient.putDeploy(signedDeploy);
+        expect(deployHash).to.not.be.undefined;
+
+        this.contextMap.put('deploy', signedDeploy);
+    }
+
+    @when(/^the the contract is invoked by hash and version with a transfer amount of "([^"]*)"$/)
+    public async theTheContractIsInvokedByHashAndVersionWithATransferAmountOf(transferAmount: string) {
+        console.info(`When the contract entry point is invoked by hash with a transfer amount of ${transferAmount}`);
+
+        const recipient = Keys.Ed25519.new().publicKey;
+        const faucetKey: AsymmetricKey = this.contextMap.get('faucetKey');
+        const contractHash = (this.contextMap.get('contractHash') as string).slice(5);
+        const ttl = DeployUtil.dehumanizerTTL("30m");
+
+        const transferArgs = RuntimeArgs.fromMap({
+            recipient: CLValueBuilder.byteArray(recipient.toAccountHash()),
+            amount: CLValueBuilder.u256(transferAmount)
+        });
+
+        const deploy = DeployUtil.makeDeploy(
+            new DeployUtil.DeployParams(faucetKey.publicKey, "casper-net-1", 1, ttl),
+
+            DeployUtil.ExecutableDeployItem.newStoredVersionContractByHash(
+                Uint8Array.from(Buffer.from(contractHash, 'hex')),
+                1,
+                'transfer',
+                transferArgs
+            ),
+            DeployUtil.standardPayment("2500000000")
+        );
+
+        const signedDeploy = deploy.sign([faucetKey]);
+
+        const deployHash = await this.casperClient.putDeploy(signedDeploy);
+        expect(deployHash).to.not.be.undefined;
+
+        this.contextMap.put('deploy', signedDeploy);
+    }
+
+    @when(/^the the contract is invoked by name "([^"]*)" and version with a transfer amount of "([^"]*)"$/)
+    public async theTheContractIsInvokedByNameAndVersionWithATransferAmountOf(contractName: string, transferAmount: string) {
+        const recipient = Keys.Ed25519.new().publicKey;
+        const faucetKey: AsymmetricKey = this.contextMap.get('faucetKey');
+        const ttl = DeployUtil.dehumanizerTTL("30m");
+
+        const transferArgs = RuntimeArgs.fromMap({
+            recipient: CLValueBuilder.byteArray(recipient.toAccountHash()),
+            amount: CLValueBuilder.u256(transferAmount)
+        });
+
+        const deploy = DeployUtil.makeDeploy(
+            new DeployUtil.DeployParams(faucetKey.publicKey, "casper-net-1", 1, ttl),
+
+            DeployUtil.ExecutableDeployItem.newStoredVersionContractByName(
+                contractName,
+                1,
+                'transfer',
+                transferArgs
+            ),
+            DeployUtil.standardPayment("2500000000")
+        );
+
+        const signedDeploy = deploy.sign([faucetKey]);
+
+        const deployHash = await this.casperClient.putDeploy(signedDeploy);
+        expect(deployHash).to.not.be.undefined;
+
+        this.contextMap.put('deploy', signedDeploy);
     }
 }

@@ -114,7 +114,12 @@ export class ClValuesSteps {
 
         const expectedValue: any = ClTypeUtils.convertToCLTypeValue(name, strValue)
         expect(arg[1].parsed).to.be.eql(expectedValue);
-        expect(arg[1].cl_type).to.be.eql(name);
+
+        if (arg[1].cl_type.ByteArray) {
+            expect(arg[1].cl_type.ByteArray).to.be.eql(hexBytes.length / 2);
+        } else {
+            expect(arg[1].cl_type).to.be.eql(name);
+        }
     }
 
 
@@ -172,7 +177,7 @@ export class ClValuesSteps {
         expect(clValue.parsed.length).to.be.eql(complexValue.value().length);
 
         for (let i = 0; i < clValue.parsed.length; i++) {
-           expect(clValue.parsed[i]).to.be.eql(complexValue.value()[i].value());
+            expect(clValue.parsed[i]).to.be.eql(complexValue.value()[i].value());
         }
     }
 
