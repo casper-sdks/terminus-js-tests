@@ -7,7 +7,7 @@ export class TestParameters {
     private static DEFAULT_RCP_PORT = '11101';
     private static DEFAULT_REST_PORT = '1401';
     private static DEFAULT_SSE_PORT = '18101';
-    private static DEFAULT_DOCKER_NAME = 'storm-nctl';
+    private static DEFAULT_DOCKER_NAME = 'cspr-nctl';
     private static instance = new TestParameters();
     private hostname = TestParameters.DEFAULT_HOST
     private _dockerName = TestParameters.DEFAULT_DOCKER_NAME;

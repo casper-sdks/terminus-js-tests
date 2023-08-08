@@ -3,7 +3,7 @@ import {CasperClient} from "casper-js-sdk";
 import {TestParameters} from "../utils/test-parameters";
 import {ContextMap} from "../utils/context-map";
 import {expect} from "chai";
-import {SimpleRcpClient} from "../utils/simple-rcp-client";
+import {SimpleRpcClient} from "../utils/simple-rpc-client";
 import {fail} from "assert";
 
 /**
@@ -16,8 +16,8 @@ export class StateGetAuctionInfoSteps {
     private casperClient = new CasperClient(TestParameters.getInstance().getRcpUrl());
     /** The map used to share results and variables across step definitions. */
     private contextMap = ContextMap.getInstance();
-    private simpleRpcClient = new SimpleRcpClient(
-         TestParameters.getInstance().getHostname(),
+    private simpleRpcClient = new SimpleRpcClient(
+        TestParameters.getInstance().getHostname(),
         TestParameters.getInstance().getRcpPort()
     );
 
@@ -145,7 +145,7 @@ export class StateGetAuctionInfoSteps {
 
         // noinspection JSUnusedLocalSymbols
         await this.casperClient.nodeClient.getValidatorsInfo("9608b4b7029a18ae35373eab879f523850a1b1fd43a3e6da774826a343af4ad2").then(validatorsInfoResult => {
-           fail('Should have thrown');
+            fail('Should have thrown');
         }).catch(e => {
             expect(e.message).to.be.eql('get-auction-info failed to get specified block');
             expect(e.code).to.be.eql(-32001);
