@@ -36,6 +36,15 @@ export class NctlClient {
         return JSON.parse(json);
     }
 
+    public getChainEraInfo(): any {
+        const json = this.exec('view_chain_era_info.sh', '');
+        return JSON.parse(json);
+    }
+
+    public getChainBlockTransfers(blockHash: string): any {
+        const json = this.exec('view_chain_block_transfers.sh', 'block=' + blockHash);
+        return JSON.parse(json);
+    }
 
     private exec(method: string, params: string): string {
 
