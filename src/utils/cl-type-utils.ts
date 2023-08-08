@@ -90,6 +90,7 @@ export class ClTypeUtils {
             case CLTypeTag.PublicKey:
             case CLTypeTag.String:
             case CLTypeTag.U256:
+            case CLTypeTag.ByteArray:
                 return strValue;
 
             case CLTypeTag.URef:
