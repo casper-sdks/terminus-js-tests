@@ -21,7 +21,3 @@ Feature: wasm operations
 
     When the the contract is invoked by name "ERC20" and version with a transfer amount of "2400000000"
     Then the contract invocation deploy is successful
-
-
-
-
