@@ -21,6 +21,10 @@ export class SimpleRpcClient {
         return this.rpc("chain_get_era_summary", `[{"Hash":  "${hash}"}]`);
     }
 
+    public async queryGetBalance(purseIdentiferName: string, identifier: string): Promise<any> {
+        return this.rpc('query_balance', `{"purse_identifier":{"${purseIdentiferName}":"${identifier}"}}`)
+    }
+
     private async rpc(method: string, params: string): Promise<any> {
 
         const id = new Date().getTime();
@@ -33,7 +37,7 @@ export class SimpleRpcClient {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Content-Length':  + payload.length
+                'Content-Length': +payload.length
             }
         };
 
