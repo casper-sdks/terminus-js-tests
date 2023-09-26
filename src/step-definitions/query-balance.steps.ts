@@ -7,7 +7,7 @@ import {SimpleRpcClient} from "../utils/simple-rpc-client";
 import {BigNumber} from "@ethersproject/bignumber";
 
 /**
- * The steps for the era feature.
+ * The steps for the query_balance.feature
  */
 @binding()
 export class QueryBalanceSteps {
