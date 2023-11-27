@@ -13,6 +13,7 @@ import {
     CLTuple2,
     CLTuple3,
     CLTypeTag,
+    CLU128,
     CLU256,
     CLU32,
     CLU512,
@@ -50,6 +51,8 @@ export class CLValueFactory {
                 return new CLU32(strValue);
             case CLTypeTag.U64:
                 return new CLU64(strValue);
+            case CLTypeTag.U128:
+                return new CLU128(strValue);
             case CLTypeTag.U256:
                 return new CLU256(strValue);
             case CLTypeTag.U512:
