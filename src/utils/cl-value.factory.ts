@@ -28,7 +28,6 @@ import {CLValue} from "casper-js-sdk/dist/lib/CLValue";
 export class CLValueFactory {
 
     createValue(clType: CLTypeTag, strValue: string): CLValue {
-
         switch (clType) {
             case CLTypeTag.Bool:
                 return new CLBool(strValue === 'true');
@@ -59,6 +58,7 @@ export class CLValueFactory {
                 return new CLU512(strValue);
             case CLTypeTag.URef:
                 return CLURef.fromFormattedStr(`uref-${strValue}-007`);
+            case CLTypeTag.Any: // Any type not yet supported in JS SDK
             default:
                 assert.fail(`Invalid clType: ${clType}`);
         }
