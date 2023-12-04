@@ -10,6 +10,9 @@ import {DeployUtils} from "../utils/deploy-utils";
 import {Deploy} from "casper-js-sdk/dist/lib/DeployUtil";
 import {JsonDeploy} from "casper-js-sdk/dist/services/CasperServiceByJsonRPC";
 
+/**
+ * The steps definitions for the option_values.feature
+ */
 @binding()
 export class OptionValuesSteps {
 
