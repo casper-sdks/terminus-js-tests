@@ -87,8 +87,9 @@ export class ClValuesSteps {
 
     @then(/^the deploys NamedArgument "([^"]*)" has a value of "([^"]*)" and bytes of "([^"]*)"$/)
     public theDeploysNamedArgumentHasAValueOfAndBytesOf(name: string, strValue: string, hexBytes: string) {
-
-        let arg = this.getNamedArgument(name);
+        const deployResult: [Deploy, GetDeployResult] = this.contextMap.get('getDeploy');
+        const deploy: JsonDeploy = deployResult[1].deploy;
+        const arg = DeployUtils.getNamedArgument(deploy, name);
         expect(arg[1].bytes).to.be.eql(hexBytes);
 
         const expectedValue: any = ClTypeUtils.convertToCLTypeValue(name, strValue)
@@ -115,7 +116,9 @@ export class ClValuesSteps {
     @then(/^the deploys NamedArgument Complex value "([^"]*)" has internal types of "([^"]*)" and values of "([^"]*)" and bytes of "([^"]*)"$/)
     public theDeploysNamedArgumentComplexValueHasInternalValuesOfAndBytesOf(name: string, types: string, values: string, hexBytes: string) {
 
-        let arg: any = this.getNamedArgument(name);
+        const deployResult: [Deploy, GetDeployResult] = this.contextMap.get('getDeploy');
+        const deploy: JsonDeploy = deployResult[1].deploy;
+        const arg = DeployUtils.getNamedArgument(deploy, name);
 
         expect(arg).to.not.be.undefined;
         expect(arg[1].bytes).to.be.eql(hexBytes);
@@ -233,12 +236,4 @@ export class ClValuesSteps {
         return types;
     }
 
-    private getNamedArgument(name: string): any {
-        const deployResult: [Deploy, GetDeployResult] = this.contextMap.get('getDeploy');
-        const deploy: JsonDeploy = deployResult[1].deploy;
-        let args: [] = (deploy.session.Transfer as any).args;
-        let arg: any = args.find(arg => arg[0] == name);
-        expect(arg).to.not.be.undefined;
-        return arg;
-    }
 }

@@ -1,5 +1,5 @@
 import {BigNumber} from "@ethersproject/bignumber";
-import {CasperClient, DeployUtil, Keys, NamedArg} from "casper-js-sdk";
+import {CasperClient, DeployUtil, JsonDeploy, Keys, NamedArg} from "casper-js-sdk";
 import {expect} from "chai";
 
 export class DeployUtils {
@@ -28,5 +28,12 @@ export class DeployUtils {
         casperClient.signDeploy(deploy, senderKeyPair);
 
         return deploy;
+    }
+
+    public static getNamedArgument(deploy: JsonDeploy, name: string): any {
+        let args: [] = (deploy.session.Transfer as any).args;
+        let arg: any = args.find(arg => arg[0] == name);
+        expect(arg).to.not.be.undefined;
+        return arg;
     }
 }
