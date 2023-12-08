@@ -1,15 +1,26 @@
 import {binding, given, then} from "cucumber-tsflow";
-import {CLTuple1, CLTuple2, CLTuple3, CLU32, CLValueParsers} from "casper-js-sdk";
+import {CasperClient, CLTuple1, CLTuple2, CLTuple3, CLU32, CLValueParsers, NamedArg} from "casper-js-sdk";
 import {expect} from "chai";
 import {BigNumber} from "@ethersproject/bignumber";
 import {CLValue} from "casper-js-sdk/dist/lib/CLValue/Abstract";
+import {DeployUtils} from "../utils/deploy-utils";
+import {TestParameters} from "../utils/test-parameters";
+import {Deploy} from "casper-js-sdk/dist/lib/DeployUtil";
+import {JsonDeploy} from "casper-js-sdk/dist/services/CasperServiceByJsonRPC";
 
+/**
+ * The steps for the nested-tuples.feature.
+ */
 @binding()
 export class NestedTuplesSteps {
 
     private clTuple1: CLTuple1 = {} as CLTuple1;
     private clTuple2: CLTuple2 = {} as CLTuple2;
     private clTuple3: CLTuple3 = {} as CLTuple3;
+    private casperClient = new CasperClient(TestParameters.getInstance().getRcpUrl());
+    private deploy: Deploy = {} as Deploy;
+    private deployHash: string = '';
+    private jsonDeploy: JsonDeploy = {} as JsonDeploy
 
     @given(/^that a nested tuple1 is defined as \(\((\d+)\)\) using U32 numeric value$/)
     public aNestedTuple1IsDefinedAsUsingU32NumericValue(value: number) {
@@ -94,6 +105,35 @@ export class NestedTuplesSteps {
         expect(innerTuple.get(2).value()).is.eql(BigNumber.from(val5));
     }
 
+    @given(/^that the nested tuples are deployed in a transfer$/)
+    public async thatTheNestedTuplesAreDeployedInATransfer() {
+        this.deploy = DeployUtils.buildStandardTransferDeploy(this.casperClient, [
+            new NamedArg("tuple1", this.clTuple1),
+            new NamedArg("tuple2", this.clTuple2),
+            new NamedArg("tuple3", this.clTuple3)
+        ]);
+        this.deployHash = await this.casperClient.putDeploy(this.deploy);
+    }
+
+    @then(/^the transfer is successful$/)
+    public theTransferIsSuccessful() {
+        expect(this.deployHash).to.not.be.null;
+    }
+
+    @then(/^the tuples deploy is obtained from the node$/)
+    public async theTuplesDeployIsObtainedFromTheNode() {
+        this.clTuple1 = {} as CLTuple1;
+        this.clTuple2 = {} as CLTuple2;
+        this.clTuple3 = {} as CLTuple3;
+
+        await this.casperClient.getDeploy(this.deployHash).then(deployAndResults => {
+            this.jsonDeploy = deployAndResults[1].deploy;
+            this.clTuple1 =  DeployUtils.getNamedArgument(this.jsonDeploy, "tuple1")[1];
+            this.clTuple2 =  DeployUtils.getNamedArgument(this.jsonDeploy, "tuple2")[1];
+            this.clTuple3 =  DeployUtils.getNamedArgument(this.jsonDeploy, "tuple3")[1];
+        });
+    }
+
     private getTuple(tupleIndex: number): CLValue {
         switch (tupleIndex) {
             case 1:
@@ -107,36 +147,3 @@ export class NestedTuplesSteps {
         }
     }
 }
-
-/*
-Then(/^the first element of the tuple1 is \(1\)$/, function () {
-
-});
-Then(, function () {
-
-});
-Given(/^ function () {
-
-});
-Then(/^the first element of the tuple2 is (\d+)$/, function () {
-
-});
-Then(, function () {
-
-});
-Then(/^the tuple2 bytes are "([^"]*)"$/, function () {
-
-});
-Given(, function () {
-
-});
-Then(, function () {
-
-});
-Then(, function () {
-
-});
-Then(/^the third element of the tuple3 is \(3, (\d+), \(5, (\d+), 7\)\)$/, function () {
-
-});
-*/
