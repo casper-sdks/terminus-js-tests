@@ -39,7 +39,13 @@ export class NestedTuplesSteps {
     }
 
     @given(/^that a nested tuple3 is defined as \((\d+), (\d+), \((\d+), (\d+), \((\d+), (\d+), (\d+)\)\)\) using U32 numeric value$/)
-    public aNestedTuple3IsDefinedAs(val1: number, val2: number, val3: number, val4: number, val5: number, val6: number, val7: number) {
+    public aNestedTuple3IsDefinedAs(val1: number,
+                                    val2: number,
+                                    val3: number,
+                                    val4: number,
+                                    val5: number,
+                                    val6: number,
+                                    val7: number) {
         this.clTuple3 = new CLTuple3([
             new CLU32(val1),
             new CLU32(val2),
