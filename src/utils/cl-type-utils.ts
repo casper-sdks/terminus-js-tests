@@ -1,4 +1,5 @@
 import {
+    ANY_TYPE,
     BOOL_TYPE,
     BYTE_ARRAY_TYPE,
     CLTypeTag,
@@ -28,6 +29,8 @@ export class ClTypeUtils {
     public static getCLType(typeName: string): CLTypeTag {
 
         switch (typeName) {
+            case ANY_TYPE:
+                return CLTypeTag.Any;
             case BOOL_TYPE:
                 return CLTypeTag.Bool;
             case BYTE_ARRAY_TYPE:

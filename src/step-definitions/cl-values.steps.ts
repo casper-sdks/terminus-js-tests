@@ -1,14 +1,14 @@
 import {ContextMap} from "../utils/context-map";
-import {CasperClient, CLTypeTag, CLValueParsers, DeployUtil, JsonDeploy, Keys, NamedArg} from "casper-js-sdk";
+import {CasperClient, CLTypeTag, CLValueParsers, JsonDeploy, NamedArg} from "casper-js-sdk";
 import {CLValueFactory} from "../utils/cl-value.factory";
 import {ClTypeUtils} from "../utils/cl-type-utils";
 import {CLValue} from "casper-js-sdk/dist/lib/CLValue/Abstract";
 import {assert, expect} from "chai";
 import {binding, given, then, when} from "cucumber-tsflow";
-import {BigNumber} from "@ethersproject/bignumber";
 import {TestParameters} from "../utils/test-parameters";
 import {Deploy} from "casper-js-sdk/dist/lib/DeployUtil";
 import {GetDeployResult} from "casper-js-sdk/dist/services";
+import {DeployUtils} from "../utils/deploy-utils";
 
 /**
  * The steps definitions for the cl_values.feature
@@ -46,31 +46,10 @@ export class ClValuesSteps {
     @when(/^the values are added as arguments to a deploy$/)
     public theValuesAreAddedAsArgumentsToADeploy() {
 
-        const amount = BigNumber.from('2500000000');
-        const senderKeyPair = this.casperClient.loadKeyPairFromPrivateFile(`./assets/net-1/user-1/secret_key.pem`, Keys.SignatureAlgorithm.Ed25519);
-        const receiverKeyPair = this.casperClient.loadKeyPairFromPrivateFile(`./assets/net-1/user-2/secret_key.pem`, Keys.SignatureAlgorithm.Ed25519);
-        const id = BigNumber.from(Math.round(Math.random()));
-        const gasPrice: number = 1;
-        const ttl = DeployUtil.dehumanizerTTL('30m');
-
-        const transfer = DeployUtil.ExecutableDeployItem.newTransfer(amount, receiverKeyPair.publicKey, undefined, id);
-        expect(transfer).to.not.be.undefined;
-
         const clValues: Array<NamedArg> = this.contextMap.get("clValues");
-        clValues.forEach(namedArg => {
-            transfer.transfer?.args.insert(namedArg.name, namedArg.value);
-        });
-
-        const standardPayment = DeployUtil.standardPayment(BigNumber.from(100000000));
-        expect(standardPayment).to.not.be.undefined;
-
-        const deployParams = new DeployUtil.DeployParams(senderKeyPair.publicKey, "casper-net-1", gasPrice, ttl);
-        const deploy = DeployUtil.makeDeploy(deployParams, transfer, standardPayment);
-
-        this.casperClient.signDeploy(deploy, senderKeyPair);
+        const deploy = DeployUtils.buildStandardTransferDeploy(this.casperClient, clValues)
 
         this.contextMap.put('putDeploy', deploy);
-
         expect(this.contextMap.get('deployResult')).to.not.be.null;
     }
 
@@ -108,8 +87,9 @@ export class ClValuesSteps {
 
     @then(/^the deploys NamedArgument "([^"]*)" has a value of "([^"]*)" and bytes of "([^"]*)"$/)
     public theDeploysNamedArgumentHasAValueOfAndBytesOf(name: string, strValue: string, hexBytes: string) {
-
-        let arg = this.getNamedArgument(name);
+        const deployResult: [Deploy, GetDeployResult] = this.contextMap.get('getDeploy');
+        const deploy: JsonDeploy = deployResult[1].deploy;
+        const arg = DeployUtils.getNamedArgument(deploy, name);
         expect(arg[1].bytes).to.be.eql(hexBytes);
 
         const expectedValue: any = ClTypeUtils.convertToCLTypeValue(name, strValue)
@@ -136,7 +116,9 @@ export class ClValuesSteps {
     @then(/^the deploys NamedArgument Complex value "([^"]*)" has internal types of "([^"]*)" and values of "([^"]*)" and bytes of "([^"]*)"$/)
     public theDeploysNamedArgumentComplexValueHasInternalValuesOfAndBytesOf(name: string, types: string, values: string, hexBytes: string) {
 
-        let arg: any = this.getNamedArgument(name);
+        const deployResult: [Deploy, GetDeployResult] = this.contextMap.get('getDeploy');
+        const deploy: JsonDeploy = deployResult[1].deploy;
+        const arg = DeployUtils.getNamedArgument(deploy, name);
 
         expect(arg).to.not.be.undefined;
         expect(arg[1].bytes).to.be.eql(hexBytes);
@@ -254,12 +236,4 @@ export class ClValuesSteps {
         return types;
     }
 
-    private getNamedArgument(name: string): any {
-        const deployResult: [Deploy, GetDeployResult] = this.contextMap.get('getDeploy');
-        const deploy: JsonDeploy = deployResult[1].deploy;
-        let args: [] = (deploy.session.Transfer as any).args;
-        let arg: any = args.find(arg => arg[0] == name);
-        expect(arg).to.not.be.undefined;
-        return arg;
-    }
 }

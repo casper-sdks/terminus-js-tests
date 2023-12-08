@@ -13,6 +13,7 @@ import {
     CLTuple2,
     CLTuple3,
     CLTypeTag,
+    CLU128,
     CLU256,
     CLU32,
     CLU512,
@@ -27,7 +28,6 @@ import {CLValue} from "casper-js-sdk/dist/lib/CLValue";
 export class CLValueFactory {
 
     createValue(clType: CLTypeTag, strValue: string): CLValue {
-
         switch (clType) {
             case CLTypeTag.Bool:
                 return new CLBool(strValue === 'true');
@@ -50,12 +50,15 @@ export class CLValueFactory {
                 return new CLU32(strValue);
             case CLTypeTag.U64:
                 return new CLU64(strValue);
+            case CLTypeTag.U128:
+                return new CLU128(strValue);
             case CLTypeTag.U256:
                 return new CLU256(strValue);
             case CLTypeTag.U512:
                 return new CLU512(strValue);
             case CLTypeTag.URef:
                 return CLURef.fromFormattedStr(`uref-${strValue}-007`);
+            case CLTypeTag.Any: // Any type not yet supported in JS SDK
             default:
                 assert.fail(`Invalid clType: ${clType}`);
         }
