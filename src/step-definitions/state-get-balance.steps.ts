@@ -4,6 +4,8 @@ import {TestParameters} from "../utils/test-parameters";
 import {NctlClient} from "../utils/nctl-client";
 import {binding, given, then} from "cucumber-tsflow";
 import {expect} from "chai";
+import {SimpleRpcClient} from "../utils/simple-rpc-client";
+import {BigNumber} from "@ethersproject/bignumber";
 
 /**
  * The state_get_balance feature's steps
@@ -13,6 +15,7 @@ export class StateGetBalanceSteps {
     private contextMap = ContextMap.getInstance();
     private casperClient = new CasperClient(TestParameters.getInstance().getRcpUrl());
     private nctl = new NctlClient(TestParameters.getInstance().dockerName);
+    private simpleRpc = new SimpleRpcClient(TestParameters.getInstance().getHostname(), TestParameters.getInstance().getRcpPort());
 
     @given(/^that the state_get_balance RPC method is invoked against nclt user-1 purse$/)
     public async thatTheState_get_balanceRPCMethodIsInvoked() {
@@ -34,13 +37,14 @@ export class StateGetBalanceSteps {
     }
 
     @then(/^the state_get_balance_result contains the purse amount$/)
-    public theState_get_balance_resultContainsThePurseAmount() {
+    public async theState_get_balance_resultContainsThePurseAmount() {
         console.info("And the state_get_balance_result contains the purse amount");
 
         const accountMainPurse = this.nctl.getAccountMainPurse(1);
-        const balance = this.nctl.geAccountBalance(accountMainPurse.stored_value.Account.main_purse);
-        const balanceData = this.contextMap.get("stateGetBalanceResult");
-        expect(balanceData).to.be.eql(balance);
+        const balance = await this.simpleRpc.queryGetBalance('purse_uref', accountMainPurse.stored_value.Account.main_purse);
+        const balanceData: BigNumber = this.contextMap.get("stateGetBalanceResult");
+        expect(balanceData instanceof BigNumber).to.be.true;
+        expect(balanceData.toString()).to.be.eql(balance.result.balance);
     }
 
     @then(/^the state_get_balance_result contains api version "([^"]*)"$/)
