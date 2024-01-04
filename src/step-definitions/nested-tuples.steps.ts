@@ -134,10 +134,73 @@ export class NestedTuplesSteps {
 
         await this.casperClient.getDeploy(this.deployHash).then(deployAndResults => {
             this.jsonDeploy = deployAndResults[1].deploy;
-            this.clTuple1 =  DeployUtils.getNamedArgument(this.jsonDeploy, "tuple1")[1];
-            this.clTuple2 =  DeployUtils.getNamedArgument(this.jsonDeploy, "tuple2")[1];
-            this.clTuple3 =  DeployUtils.getNamedArgument(this.jsonDeploy, "tuple3")[1];
+            this.clTuple1 = DeployUtils.getNamedArgument(this.jsonDeploy, "tuple1")[1];
+            this.clTuple2 = DeployUtils.getNamedArgument(this.jsonDeploy, "tuple2")[1];
+            this.clTuple3 = DeployUtils.getNamedArgument(this.jsonDeploy, "tuple3")[1];
         });
+    }
+
+    @then(/^the "([^"]*)" element of the Tuple(\d+) is "\(1\)"$/)
+    theNthElementOfTupleNisStr(nth: string, tupleIndex: number, value: string) {
+
+        let val: CLValue;
+
+        switch (tupleIndex) {
+            case 1:
+                val = this.clTuple1.get(this.getIndex(nth));
+                break;
+            case 2:
+                val = this.clTuple2.get(this.getIndex(nth));
+                break;
+            case 3:
+                val = this.clTuple3.get(this.getIndex(nth));
+                break;
+            default:
+                throw "Invalid tuple index: " + tupleIndex;
+        }
+
+        expect(val.value()).is.eql(BigNumber.from(value));
+    }
+
+
+    @then(/^the "([^"]*)" element of the Tuple(\d+) is (\d+)$/)
+    theNthElementOfTupleNisNum(nth: string, tupleIndex: number, value: number) {
+
+        let val: CLValue;
+
+        switch (tupleIndex) {
+            case 1:
+                val = this.clTuple1.get(this.getIndex(nth));
+                break;
+            case 2:
+                val = this.clTuple2.get(this.getIndex(nth));
+                break;
+            case 3:
+                val = this.clTuple3.get(this.getIndex(nth));
+                break;
+            default:
+                throw "Invalid tuple index: " + tupleIndex;
+        }
+
+        expect(val.value()).is.eql(BigNumber.from(value));
+    }
+
+    @then(/^the "([^"]*)" element of the Tuple2 is "\((\d+), \((\d+), (\d+)\)\)"$/)
+    theNthElementOfTuple2IsStr(nth: string, val1: number, val2: number, val3: number) {
+        expect(this.clTuple2.get(0).value()).to.be.eql(val1);
+        const nested = this.clTuple2.get(1) as CLTuple2;
+        expect(nested.get(0).value()).to.be.eql(val2);
+        expect(nested.get(1).value()).to.be.eql(val3);
+    }
+
+    private getIndex(nth: string): number {
+        if ("first" == nth) {
+            return 0;
+        } else if ("second" == nth) {
+            return 1;
+        } else {
+            throw new Error("Invalid index: " + nth);
+        }
     }
 
     private getTuple(tupleIndex: number): CLValue {
@@ -152,4 +215,5 @@ export class NestedTuplesSteps {
                 throw "Invalid tuple index: " + tupleIndex;
         }
     }
+
 }
