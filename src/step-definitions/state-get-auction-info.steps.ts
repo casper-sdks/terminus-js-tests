@@ -147,7 +147,7 @@ export class StateGetAuctionInfoSteps {
         await this.casperClient.nodeClient.getValidatorsInfo("9608b4b7029a18ae35373eab879f523850a1b1fd43a3e6da774826a343af4ad2").then(validatorsInfoResult => {
             fail('Should have thrown');
         }).catch(e => {
-            expect(e.message).to.be.eql('get-auction-info failed to get specified block');
+            expect(e.message).to.be.eql('No such block');
             expect(e.code).to.be.eql(-32001);
             pass = true;
         });
