@@ -141,11 +141,6 @@ export class NestedOptionsSteps {
         throw new Error("Any not implemented yet");
     }
 
-    @given(/^the transfer containing the nested Option is successfully execute$/)
-    public theTransferContainingTheNestedOptionIsSuccessfullyExecute() {
-
-    }
-
     private getIndex(nth: string): number {
         return (+nth.substring(0, 1)) - 1;
     }
