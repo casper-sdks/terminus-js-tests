@@ -12,18 +12,18 @@ Feature: Nested Options
 
   Scenario: Nested List
     Given that a nested Option has an inner type of List with a type of U256 and a value of (1, 2, 3)
-    And the list's length is 3
-    And the list's "1st" item is a CLValue with U256 value of 1
-    And the list's "2nd" item is a CLValue with U256 value of 2
-    And the list's "3rd" item is a CLValue with U256 value of 3
+    And the nested list's length is 3
+    And the nested list's "1st" item is a CLValue with U256 value of 1
+    And the nested list's "2nd" item is a CLValue with U256 value of 2
+    And the nested list's "3rd" item is a CLValue with U256 value of 3
     And the bytes are "0103000000010101020103"
     Given that the nested Option is deployed in a transfer
     And the transfer containing the nested Option is successfully executed
     When the Option is read from the deploy
-    And the list's length is 3
-    And the list's "1st" item is a CLValue with U256 value of 1
-    And the list's "2nd" item is a CLValue with U256 value of 2
-    And the list's "3rd" item is a CLValue with U256 value of 3
+    And the nested list's length is 3
+    And the nested list's "1st" item is a CLValue with U256 value of 1
+    And the nested list's "2nd" item is a CLValue with U256 value of 2
+    And the nested list's "3rd" item is a CLValue with U256 value of 3
     And the bytes are "0103000000010101020103"
 
   Scenario: Nested Tuple
