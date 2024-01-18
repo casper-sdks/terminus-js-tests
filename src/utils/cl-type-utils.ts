@@ -77,6 +77,16 @@ export class ClTypeUtils {
         }
     }
 
+   public static getCLTypes(typeNames: string): CLTypeTag[] {
+
+        const types: CLTypeTag[] = [];
+        typeNames.split(",").forEach(typeName => {
+            types.push(ClTypeUtils.getCLType(typeName.trim()));
+        });
+
+        return types;
+    }
+
     public static convertToCLTypeValue(typeName: string, strValue: string): any {
         switch (ClTypeUtils.getCLType(typeName)) {
 
@@ -89,20 +99,17 @@ export class ClTypeUtils {
             case CLTypeTag.U64:
             case CLTypeTag.U128:
                 return Number.parseInt(strValue);
-
             case CLTypeTag.PublicKey:
             case CLTypeTag.String:
             case CLTypeTag.U256:
             case CLTypeTag.ByteArray:
                 return strValue;
-
             case CLTypeTag.URef:
                 return `uref-${strValue}-007`;
 
             default:
                 assert.fail(`Invalid typeName: ${typeName}`);
         }
-
     }
 
     static isComplexType(typeName: string) {
@@ -115,7 +122,6 @@ export class ClTypeUtils {
             case CLTypeTag.Tuple2:
             case CLTypeTag.Tuple3:
                 return true;
-
             default:
                 return false;
         }
