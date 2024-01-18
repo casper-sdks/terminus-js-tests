@@ -39,7 +39,6 @@ export class CLValueFactory {
                 return new CLI64(strValue);
             case CLTypeTag.Key:
                 return new CLKey(new CLByteArray(Uint8Array.from(Buffer.from(strValue, 'hex'))));
-
             case CLTypeTag.PublicKey:
                 return CLPublicKey.fromHex(strValue);
             case CLTypeTag.String:
