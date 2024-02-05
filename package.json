@@ -1,5 +1,5 @@
 {
-  "name": "cspr-typescript-sdk-standard-tests",
+  "name": "terminus-js-tests",
   "version": "1.0.0",
   "description": "This repo holds a set of tests to be run against the Casper Typescript SDK.",
   "main": "index.js",
@@ -9,15 +9,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/stormeye2000/cspr-typescript-sdk-standard-tests.git"
+    "url": "git+https://github.com/casper-sdks/terminus-js-tests.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/stormeye2000/cspr-typescript-sdk-standard-tests/issues"
+    "url": "https://github.com/casper-sdks/terminus-js-tests/issues"
   },
-  "homepage": "https://github.com/stormeye2000/cspr-typescript-sdk-standard-tests#readme",
+  "homepage": "https://github.com/casper-sdks/terminus-js-tests#readme",
   "devDependencies": {
     "@cucumber/cucumber": "^9.1.0",
     "@cucumber/pretty-formatter": "^1.0.0",
