@@ -14,7 +14,7 @@ Points to note are:
 
 ### How to install / Run Locally
 - Install node v16.13.0 or higher
-- checkout from github:  `git clone git@github.com:stormeye2000/cspr-typescript-sdk-standard-tests.git`
-- `cd cspr-typescript-sdk-standar-tests`
+- checkout from github:  `git clone git@github.com:casper-sdks/terminus-js-tests.git`
+- `cd terminus-js-tests`
 - `npm install`
 - `npm test`
