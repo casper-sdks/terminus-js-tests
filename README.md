@@ -1,20 +1,35 @@
-## CSPR SDK Standard Tests: TypeScript
+## Terminus JS
 
 This repo holds a set of tests to be run against the Casper Typescript SDK.
 
 Points to note are:
 
-- The tests are run via a GitHub action, standard-tests.yml
-- The action is well documented with the steps clearly labelled
-- A dockerised image of NCTL with it's generated assets is used to run the tests against
-- Tests will run automatically on a push to main within the SDK repo
-- Tests can be run manually within this repos action tab
+- The tests can be run manually via the Terminus project [here](https://github.com/casper-sdks/terminus) 
 - The tests are built using Cucumber features
 
 
-### How to install / Run Locally
-- Install node v16.13.0 or higher
-- checkout from github:  `git clone git@github.com:casper-sdks/terminus-js-tests.git`
-- `cd terminus-js-tests`
-- `npm install`
-- `npm test`
+### How to run locally
+- Install latest node version
+
+- Clone repo and start NCTL (please note the NCTL Casper node version in the script 'docker-run')
+
+  ```bash
+  git clone git@github.com:casper-sdks/terminus-js-tests.git
+  cd terminus-js-tests/script
+  ./docker-run
+  ./docker-copy-assets
+  cd ..
+  ```
+
+- npm install required SDK branch and run the tests
+
+  ```bash
+  npm uninstall casper-js-sdk
+  rm package-lock.json && rm -rf node_modules
+  git clone https://github.com/casper-ecosystem/casper-js-sdk.git -b [required-branch]
+  npm install casper-js-sdk
+  npm test
+  ```
+
+
+
