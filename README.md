@@ -8,16 +8,16 @@ Points to note are:
 - The tests are built using Cucumber features
 
 
-### How to run locally
+### How to run locally CLI
 - Install latest node version
 
 - Clone repo and start NCTL (please note the NCTL Casper node version in the script 'docker-run')
 
   ```bash
   git clone git@github.com:casper-sdks/terminus-js-tests.git
-  cd terminus-js-tests/script
-  ./docker-run
-  ./docker-copy-assets
+  cd terminus-js-tests/scripts
+  chmod +x docker-run && ./docker-run
+  chmod +x docker-copy-assets && /docker-copy-assets 
   cd ..
   ```
 
@@ -30,6 +30,18 @@ Points to note are:
   npm install casper-js-sdk
   npm test
   ```
+
+- TODO script the above
+
+- JUnit test results will be output to /reports
+
+### How to run locally IDE
+
+Alternatively the tests can be run using an IDE
+
+They are developed using JetBrains WebStorm
+
+
 
 
 
