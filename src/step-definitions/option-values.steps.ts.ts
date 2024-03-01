@@ -1,5 +1,5 @@
 import {binding, given, then, when} from "cucumber-tsflow";
-import {CasperClient, CLBoolType, CLOption, CLValueParsers, NamedArg} from "casper-js-sdk";
+import {CasperClient, CLBoolType, CLOption, CLValueParsers, JsonDeploy, NamedArg} from "casper-js-sdk";
 import {None, Some} from "ts-results";
 import {CLValue} from "casper-js-sdk/dist/lib/CLValue/Abstract";
 import {expect} from "chai";
@@ -8,7 +8,6 @@ import {TestParameters} from "../utils/test-parameters";
 import {ClTypeUtils} from "../utils/cl-type-utils";
 import {DeployUtils} from "../utils/deploy-utils";
 import {Deploy} from "casper-js-sdk/dist/lib/DeployUtil";
-import {JsonDeploy} from "casper-js-sdk/dist/services/CasperServiceByJsonRPC";
 
 /**
  * The steps definitions for the option_values.feature

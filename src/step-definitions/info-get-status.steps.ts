@@ -1,9 +1,8 @@
 import {binding, given, then} from "cucumber-tsflow";
 import {ContextMap} from "../utils/context-map";
 import {expect} from "chai";
-import {CasperClient} from "casper-js-sdk";
+import {CasperClient, GetStatusResult} from "casper-js-sdk";
 import {TestParameters} from "../utils/test-parameters";
-import {GetStatusResult} from "casper-js-sdk/dist/services/CasperServiceByJsonRPC";
 import {NctlClient} from "../utils/nctl-client";
 
 /**
@@ -69,12 +68,17 @@ export class InfoGetStatusSteps {
         const expectedStateRootHash = jsonNode.last_added_block_info.state_root_hash;
         const expectedCreator = jsonNode.last_added_block_info.creator;
 
-        expect(statusData.last_added_block_info.hash).to.eql(expectedHash);
-        expect(statusData.last_added_block_info.timestamp).to.eql(expectedTimestamp);
-        expect(statusData.last_added_block_info.era_id).to.eql(expectedEraId);
-        expect(statusData.last_added_block_info.height).to.eql(expectedHeight);
-        expect(statusData.last_added_block_info.state_root_hash).to.eql(expectedStateRootHash);
-        expect(statusData.last_added_block_info.creator).to.eql(expectedCreator);
+        expect(statusData.last_added_block_info).to.not.be.null;
+
+        // We have to case to any as LastAddedBlockInfo is not exported
+        const lastAddedBlockInfo = statusData.last_added_block_info as any;
+
+        expect(lastAddedBlockInfo.hash).to.eql(expectedHash);
+        expect(lastAddedBlockInfo.timestamp).to.eql(expectedTimestamp);
+        expect(lastAddedBlockInfo.era_id).to.eql(expectedEraId);
+        expect(lastAddedBlockInfo.height).to.eql(expectedHeight);
+        expect(lastAddedBlockInfo.state_root_hash).to.eql(expectedStateRootHash);
+        expect(lastAddedBlockInfo.creator).to.eql(expectedCreator);
     }
 
     @then(/^the info_get_status_result has a valid our_public_signing_key$/)
