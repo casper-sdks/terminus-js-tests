@@ -1,12 +1,12 @@
 import {binding, given, then} from "cucumber-tsflow";
 import {ContextMap} from "../utils/context-map";
 import {assert, expect} from "chai";
-import {CasperClient, DeployUtil, Keys} from "casper-js-sdk";
+import {CasperClient, DeployUtil, GetBlockResult, Keys} from "casper-js-sdk";
 import {TestParameters} from "../utils/test-parameters";
 import {BigNumber} from "@ethersproject/bignumber";
 import {AsymmetricKey} from "casper-js-sdk/dist/lib/Keys";
-import {GetBlockResult, GetDeployResult} from "casper-js-sdk/dist/services/CasperServiceByJsonRPC";
 import {Deploy} from "casper-js-sdk/dist/lib/DeployUtil";
+import {GetDeployResult} from "casper-js-sdk/dist/services";
 
 /**
  * The class that implements the steps for the deploys_generated_keys.feature.

@@ -1,8 +1,7 @@
 import {binding, given, then} from "cucumber-tsflow";
 import {ContextMap} from "../utils/context-map";
-import {CasperClient} from "casper-js-sdk";
+import {CasperClient, GetPeersResult} from "casper-js-sdk";
 import {expect} from "chai";
-import {GetPeersResult} from "casper-js-sdk/dist/services/CasperServiceByJsonRPC";
 import {TestParameters} from "../utils/test-parameters";
 
 /**

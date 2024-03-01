@@ -1,12 +1,11 @@
 import {binding, given, then} from "cucumber-tsflow";
-import {CasperClient, CLTuple1, CLTuple2, CLTuple3, CLU32, CLValueParsers, NamedArg} from "casper-js-sdk";
+import {CasperClient, CLTuple1, CLTuple2, CLTuple3, CLU32, CLValueParsers, JsonDeploy, NamedArg} from "casper-js-sdk";
 import {expect} from "chai";
 import {BigNumber} from "@ethersproject/bignumber";
 import {CLValue} from "casper-js-sdk/dist/lib/CLValue/Abstract";
 import {DeployUtils} from "../utils/deploy-utils";
 import {TestParameters} from "../utils/test-parameters";
 import {Deploy} from "casper-js-sdk/dist/lib/DeployUtil";
-import {JsonDeploy} from "casper-js-sdk/dist/services/CasperServiceByJsonRPC";
 
 /**
  * The steps for the nested-tuples.feature.

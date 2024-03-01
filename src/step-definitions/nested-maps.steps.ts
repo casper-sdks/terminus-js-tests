@@ -1,12 +1,11 @@
 import {binding, given, then, when} from "cucumber-tsflow";
-import {CasperClient, CLMap, CLTypeTag, CLValueParsers, NamedArg} from "casper-js-sdk";
+import {CasperClient, CLMap, CLTypeTag, CLValueParsers, JsonDeploy, NamedArg} from "casper-js-sdk";
 import {CLValueFactory} from "../utils/cl-value.factory";
 import {TestParameters} from "../utils/test-parameters";
 import {Deploy} from "casper-js-sdk/dist/lib/DeployUtil";
 import {CLValue} from "casper-js-sdk/dist/lib/CLValue/Abstract";
 import {expect} from "chai";
 import {DeployUtils} from "../utils/deploy-utils";
-import {JsonDeploy} from "casper-js-sdk/dist/services/CasperServiceByJsonRPC";
 
 /**
  * The steps for the nested-maps.feature
