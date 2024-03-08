@@ -119,7 +119,8 @@ export class DeploysGeneratedKeysSteps {
         const standardPayment = DeployUtil.standardPayment(BigNumber.from(payment));
         expect(standardPayment).to.not.be.undefined;
 
-        const deployParams = new DeployUtil.DeployParams(senderKeyPair.publicKey, 'casper-net-1', gasPrice, ttl);
+        const deployParams = new DeployUtil.DeployParams(senderKeyPair.publicKey, TestParameters.getInstance().getChainName, gasPrice, ttl);
+
         const deploy = DeployUtil.makeDeploy(deployParams, transfer, standardPayment);
 
         this.casperClient.signDeploy(deploy, senderKeyPair);

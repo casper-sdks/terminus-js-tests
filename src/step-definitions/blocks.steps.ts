@@ -1,5 +1,5 @@
 import {ContextMap} from "../utils/context-map";
-import {NctlClient} from "../utils/nctl-client";
+import {Node} from "../utils/node";
 import {TestParameters} from "../utils/test-parameters";
 import {CasperClient, DeployUtil, encodeBase16, Keys} from "casper-js-sdk";
 import {expect} from "chai";
@@ -16,8 +16,9 @@ export class BlocksSteps {
     private invalidBlockHash = "2fe9630b7790852e4409d815b04ca98f37effcdf9097d317b9b9b8ad658f47c8";
     private invalidHeight = 9999999999;
     private contextMap = ContextMap.getInstance();
-    private nctl = new NctlClient(TestParameters.getInstance().dockerName);
+    private node = new Node(TestParameters.getInstance().dockerName);
     private casperClient = new CasperClient(TestParameters.getInstance().getRcpUrl());
+    private chainName = TestParameters.getInstance().getChainName;
 
     @given(/^that the latest block is requested via the sdk$/)
     public async thatTheLatestBlockIsRequestedViaTheSdk() {
@@ -35,7 +36,7 @@ export class BlocksSteps {
 
         console.info("Then request the latest block via the test node");
 
-        this.contextMap.put("blockDataNode", this.nctl.getChainBlock(this.contextMap.get('latestBlock')));
+        this.contextMap.put("blockDataNode", this.node.getChainBlock(this.contextMap.get('latestBlock')));
     }
 
     @then(/^the body of the returned block is equal to the body of the returned test node block$/)
@@ -95,9 +96,9 @@ export class BlocksSteps {
         expect(latestBlockSdk.block.proofs.length).to.be.eql(latestBlockNode.proofs.length);
 
         for (const [index, proof] of latestBlockSdk.block.proofs.entries()) {
-            const nctlProof = latestBlockNode.proofs[index];
-            expect(proof.public_key).to.be.eql(nctlProof.public_key);
-            expect(proof.signature).to.be.eql(nctlProof.signature);
+            const nodeProof = latestBlockNode.proofs[index];
+            expect(proof.public_key).to.be.eql(nodeProof.public_key);
+            expect(proof.signature).to.be.eql(nodeProof.signature);
         }
     }
 
@@ -133,7 +134,7 @@ export class BlocksSteps {
     public requestABlockByHashViaTheTestNode() {
         console.info("Then request a block by hash via the test node");
 
-        let chainBlock = this.nctl.getChainBlock(this.contextMap.get('latestBlock'));
+        let chainBlock = this.node.getChainBlock(this.contextMap.get('latestBlock'));
         this.contextMap.put('blockNodeData', chainBlock);
     }
 
@@ -174,15 +175,15 @@ export class BlocksSteps {
     public requestTheReturnedBlockFromTheTestNodeViaItsHash() {
 
         console.info("Then request the returned block from the test node via its hash");
-        //NCTL doesn't have get block via height, so we use the sdk's returned block has
-        this.contextMap.put("blockDataNode", this.nctl.getChainBlock(this.contextMap.get("blockHashSdk")));
+        //CCTL doesn't have get block via height, so we use the sdk's returned block has
+        this.contextMap.put("blockDataNode", this.node.getChainBlock(this.contextMap.get("blockHashSdk")));
     }
 
     @given(/^that a test node era switch block is requested$/)
     public thatATestNodeEraSwitchBlockIsRequested() {
 
         console.info("Given that a test node era switch block is requested");
-        this.contextMap.put('nodeEraSwitchBlockResult', this.nctl.getChainEraInfo());
+        this.contextMap.put('nodeEraSwitchBlockResult', this.node.getChainEraInfo());
     }
 
     @then(/^request the block transfer from the test node$/)
@@ -192,7 +193,7 @@ export class BlocksSteps {
 
         let blockHash: string = this.contextMap.get('blockHash');
 
-        this.contextMap.put('transferBlockNode', this.nctl.getChainBlockTransfers(blockHash));
+        this.contextMap.put('transferBlockNode', this.node.getChainBlockTransfers(blockHash));
     }
 
     @given(/^that chain transfer data is initialised$/)
@@ -229,7 +230,7 @@ export class BlocksSteps {
         const standardPayment = DeployUtil.standardPayment(BigNumber.from(100000000));
         expect(standardPayment).to.not.be.undefined;
 
-        const deployParams = new DeployUtil.DeployParams(senderKeyPair.publicKey, "casper-net-1", gasPrice, ttl);
+        const deployParams = new DeployUtil.DeployParams(senderKeyPair.publicKey, TestParameters.getInstance().getChainName, gasPrice, ttl);
         const deploy = DeployUtil.makeDeploy(deployParams, transfer, standardPayment);
 
         this.casperClient.signDeploy(deploy, senderKeyPair);
