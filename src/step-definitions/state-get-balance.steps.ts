@@ -1,7 +1,7 @@
 import {ContextMap} from "../utils/context-map";
 import {CasperClient} from "casper-js-sdk";
 import {TestParameters} from "../utils/test-parameters";
-import {NctlClient} from "../utils/nctl-client";
+import {Node} from "../utils/node";
 import {binding, given, then} from "cucumber-tsflow";
 import {expect} from "chai";
 import {SimpleRpcClient} from "../utils/simple-rpc-client";
@@ -14,15 +14,15 @@ import {BigNumber} from "@ethersproject/bignumber";
 export class StateGetBalanceSteps {
     private contextMap = ContextMap.getInstance();
     private casperClient = new CasperClient(TestParameters.getInstance().getRcpUrl());
-    private nctl = new NctlClient(TestParameters.getInstance().dockerName);
+    private node = new Node(TestParameters.getInstance().dockerName);
     private simpleRpc = new SimpleRpcClient(TestParameters.getInstance().getHostname(), TestParameters.getInstance().getRcpPort());
 
     @given(/^that the state_get_balance RPC method is invoked against nclt user-1 purse$/)
     public async thatTheState_get_balanceRPCMethodIsInvoked() {
         console.info("Given that the state_get_balance RPC method is invoked");
-        const stateRootHash = this.nctl.getStateRootHash(1);
-        const accountMainPurse = this.nctl.getAccountMainPurse(1);
-        const purseUref: string = accountMainPurse.stored_value.Account.main_purse;
+        const stateRootHash = this.node.getStateRootHash(1);
+        const accountMainPurse = this.node.getAccountMainPurse(1);
+        const purseUref: string = accountMainPurse.main_purse;
         await this.casperClient.nodeClient.getAccountBalance(stateRootHash, purseUref).then(balance => {
             this.contextMap.put("stateGetBalanceResult", balance);
         });
@@ -40,8 +40,8 @@ export class StateGetBalanceSteps {
     public async theState_get_balance_resultContainsThePurseAmount() {
         console.info("And the state_get_balance_result contains the purse amount");
 
-        const accountMainPurse = this.nctl.getAccountMainPurse(1);
-        const balance = await this.simpleRpc.queryGetBalance('purse_uref', accountMainPurse.stored_value.Account.main_purse);
+        const accountMainPurse = this.node.getAccountMainPurse(1);
+        const balance = await this.simpleRpc.queryGetBalance('purse_uref', accountMainPurse.main_purse);
         const balanceData: BigNumber = this.contextMap.get("stateGetBalanceResult");
         expect(balanceData instanceof BigNumber).to.be.true;
         expect(balanceData.toString()).to.be.eql(balance.result.balance);

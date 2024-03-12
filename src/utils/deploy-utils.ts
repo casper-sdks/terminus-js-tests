@@ -1,6 +1,8 @@
 import {BigNumber} from "@ethersproject/bignumber";
 import {CasperClient, DeployUtil, JsonDeploy, Keys, NamedArg} from "casper-js-sdk";
 import {expect} from "chai";
+import {TestParameters} from "../utils/test-parameters";
+import {Node} from "./node";
 
 export class DeployUtils {
 
@@ -22,7 +24,7 @@ export class DeployUtils {
         const standardPayment = DeployUtil.standardPayment(BigNumber.from(100000000));
         expect(standardPayment).to.not.be.undefined;
 
-        const deployParams = new DeployUtil.DeployParams(senderKeyPair.publicKey, "casper-net-1", gasPrice, ttl);
+        const deployParams = new DeployUtil.DeployParams(senderKeyPair.publicKey, TestParameters.getInstance().getChainName , gasPrice, ttl);
         const deploy = DeployUtil.makeDeploy(deployParams, transfer, standardPayment);
 
         casperClient.signDeploy(deploy, senderKeyPair);

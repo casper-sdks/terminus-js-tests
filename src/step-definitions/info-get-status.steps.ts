@@ -3,7 +3,7 @@ import {ContextMap} from "../utils/context-map";
 import {expect} from "chai";
 import {CasperClient, GetStatusResult} from "casper-js-sdk";
 import {TestParameters} from "../utils/test-parameters";
-import {NctlClient} from "../utils/nctl-client";
+import {Node} from "../utils/node";
 
 /**
  * Steps for the info_get_status RPC test feature.
@@ -15,7 +15,7 @@ export class InfoGetStatusSteps {
 
     private contextMap = ContextMap.getInstance();
     private casperClient = new CasperClient(TestParameters.getInstance().getRcpUrl());
-    private nctlClient = new NctlClient(TestParameters.getInstance().dockerName);
+    private node = new Node(TestParameters.getInstance().dockerName);
 
     @given(/^that the info_get_status is invoked against nctl$/)
     public async thatTheInfo_get_statusIsInvoked() {
@@ -51,7 +51,7 @@ export class InfoGetStatusSteps {
         const statusData: any = this.contextMap.get('statusData');
 
         // noinspection TypeScriptUnresolvedVariable
-        expect(statusData.chainspec_name).to.eql(chainSpecName);
+        expect(statusData.chainspec_name).to.eql(TestParameters.getInstance().getChainName);
     }
 
     @then(/^the info_get_status_result has a valid last_added_block_info$/)
@@ -158,7 +158,7 @@ export class InfoGetStatusSteps {
     }
 
     private getNodeStatus(nodeId: number): any {
-        // Obtain from nctl
-        return this.nctlClient.getNodeStatus(nodeId);
+        // Obtain from the node
+        return this.node.getNodeStatus(nodeId);
     }
 }

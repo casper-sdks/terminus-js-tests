@@ -1,7 +1,7 @@
 import {ContextMap} from "../utils/context-map";
 import {CasperClient} from "casper-js-sdk";
 import {TestParameters} from "../utils/test-parameters";
-import {NctlClient} from "../utils/nctl-client";
+import {Node} from "../utils/node";
 import {binding, given, then} from "cucumber-tsflow";
 import {expect} from "chai";
 
@@ -13,7 +13,7 @@ export class ChainGetStateRootHashSteps {
 
     private contextMap = ContextMap.getInstance();
     private casperClient = new CasperClient(TestParameters.getInstance().getRcpUrl());
-    private nctl = new NctlClient(TestParameters.getInstance().dockerName);
+    private node = new Node(TestParameters.getInstance().dockerName);
 
     @given(/^that the chain_get_state_root_hash RCP method is invoked against nctl$/)
     public async thatTheChain_get_state_root_hashRCPMethodIsInvoked() {
@@ -29,7 +29,7 @@ export class ChainGetStateRootHashSteps {
         const stateRootHashData = this.contextMap.get('stateRootHash');
         expect(stateRootHashData).to.not.be.undefined;
 
-        const expectedStateRootHash =  this.nctl.getStateRootHash(1);
+        const expectedStateRootHash =  this.node.getStateRootHash(1);
         expect(stateRootHashData).to.be.eql(expectedStateRootHash);
     }
 }

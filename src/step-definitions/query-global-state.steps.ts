@@ -82,7 +82,7 @@ export class QueryGlobalStateSteps {
 
         console.info(`And the query_global_state_result's stored value from is the user-${userId} account hash`);
         const storedValue : StoredValue = this.contextMap.get("globalStateData");
-        const accountHash = ""; // TODO nctl.getAccountHash(userId);
+        const accountHash = ""; // TODO node.getAccountHash(userId);
         expect(storedValue.DeployInfo?.from).to.be(accountHash);
         // DeployInfo storedValueDeployInfo = getGlobalDataDataStoredValue();
         // assertThat(storedValueDeployInfo.getFrom(), is(accountHash));*/
@@ -107,7 +107,7 @@ export class QueryGlobalStateSteps {
     public theQuery_global_state_resultSStoredValueContainsTheTransferSource() {
         console.info("And the query_global_state_result stored value contains the transfer source uref");
         /* DeployInfo storedValueDeployInfo = getGlobalDataDataStoredValue();
-         String accountMainPurse = nctl.getAccountMainPurse(1);
+         String accountMainPurse = node.getAccountMainPurse(1);
          assertThat(storedValueDeployInfo.getSource().getJsonURef(), is(accountMainPurse));*/
     }
 
@@ -128,7 +128,7 @@ export class QueryGlobalStateSteps {
         console.info("When the query_global_state RCP method is invoked with the state root hash as the query identifier");
         /* StateRootHashData stateRootHash = contextMap.get(STATE_ROOT_HASH);
          StateRootHashIdentifier globalStateIdentifier = new StateRootHashIdentifier(stateRootHash.getStateRootHash());
-         // Need to invoke nctl-view-faucet-account to get uref
+         // Need to invoke mode view-faucet-account to get uref
          String key = "uref-d0343bb766946f9f850a67765aae267044fa79a6cd50235ffff248a37534";
          try {
              casperService.queryGlobalState(globalStateIdentifier, key, new String[0]);
@@ -196,7 +196,7 @@ export class QueryGlobalStateSteps {
         const standardPayment = DeployUtil.standardPayment(BigNumber.from(100000000));
         expect(standardPayment).to.not.be.undefined;
 
-        const deployParams = new DeployUtil.DeployParams(senderKeyPair.publicKey, "casper-net-1", gasPrice, ttl);
+        const deployParams = new DeployUtil.DeployParams(senderKeyPair.publicKey, TestParameters.getInstance().getChainName, gasPrice, ttl);
         const deploy = DeployUtil.makeDeploy(deployParams, transfer, standardPayment);
 
         this.casperClient.signDeploy(deploy, senderKeyPair);
