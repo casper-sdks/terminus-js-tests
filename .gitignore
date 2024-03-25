@@ -3,6 +3,6 @@
 /reports
 /assets
 .DS_Store
-/src/contracts/
-/src/features/
-/src/json/
+/src/contracts
+/src/features
+/src/json
