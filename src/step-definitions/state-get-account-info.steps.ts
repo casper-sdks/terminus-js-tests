@@ -17,7 +17,7 @@ export class StateGetAccountInfoSteps {
     @given(/^that the state_get_account_info RCP method is invoked against nctl$/)
     public async thatTheStateGetAccountInfoRcpMethodIsInvoked() {
 
-        console.info("Given that the state_get_account_info RCP method is invoked against nctl");
+        console.info("Given that the state_get_account_info RCP method is invoked against the node");
 
         const hexPublicKey = this.getUserOneHexPublicKey();
 
@@ -47,7 +47,7 @@ export class StateGetAccountInfoSteps {
     public theState_get_account_info_resultContainAValidAccountHash() {
         console.info("And the state_get_account_info_result contain a valid account hash");
         /*   final AccountData stateAccountInfo = contextMap.get(STATE_ACCOUNT_INFO);
-           final String expectedAccountHash = nctl.getAccountHash(1);
+           final String expectedAccountHash = node.getAccountHash(1);
            assertThat(stateAccountInfo.getAccount().getHash(), is(expectedAccountHash));*/
     }
 
@@ -55,7 +55,7 @@ export class StateGetAccountInfoSteps {
     public theState_get_account_info_resultContainAValidMainPurseUref() {
         console.info("And the state_get_account_info_result contain a valid main purse uref");
         /* final AccountData stateAccountInfo = contextMap.get(STATE_ACCOUNT_INFO);
-         final String accountMainPurse = nctl.getAccountMainPurse(1);
+         final String accountMainPurse = node.getAccountMainPurse(1);
          assertThat(stateAccountInfo.getAccount().getMainPurse(), is(accountMainPurse));*/
     }
 
@@ -64,14 +64,14 @@ export class StateGetAccountInfoSteps {
         console.info("And the state_get_account_info_result contain a valid merkle proof");
         /* final AccountData stateAccountInfo = contextMap.get(STATE_ACCOUNT_INFO);
          assertThat(stateAccountInfo.getMerkelProof(), is(notNullValue()));
-         assertThat(stateAccountInfo.getMerkelProof(), is(isValidMerkleProof(nctl.getAccountMerkelProof(1))));*/
+         assertThat(stateAccountInfo.getMerkelProof(), is(isValidMerkleProof(node.getAccountMerkelProof(1))));*/
     }
 
     @then(/^the state_get_account_info_result contain a valid associated keys$/)
     public theState_get_account_info_resultContainAValidAssociatedKeys() {
         console.info("And the state_get_account_info_result contain a valid associated keys");
         /*    final AccountData stateAccountInfo = contextMap.get(STATE_ACCOUNT_INFO);
-            final String expectedAccountHash = nctl.getAccountHash(1);
+            final String expectedAccountHash = node.getAccountHash(1);
             assertThat(stateAccountInfo.getAccount().getAssociatedKeys().get(0).getAccountHash(), is(expectedAccountHash));
             assertThat(stateAccountInfo.getAccount().getAssociatedKeys().get(0).getWeight(), is(1));*/
     }
@@ -81,7 +81,7 @@ export class StateGetAccountInfoSteps {
     public theState_get_account_info_resultContainAValidActionThresholds() {
         console.info("And the state_get_account_info_result contain a valid action thresholds");
         /*   final AccountData stateAccountInfo = contextMap.get(STATE_ACCOUNT_INFO);
-           final JsonNode userAccountJson = nctl.getUserAccount(1);
+           final JsonNode userAccountJson = node.getUserAccount(1);
            final ActionThresholds deployment = stateAccountInfo.getAccount().getDeployment();
            assertThat(deployment, is(notNullValue()));
            assertThat(deployment.getDeployment(), is(userAccountJson.at("/stored_value/Account/action_thresholds/deployment").asInt()));
@@ -92,7 +92,7 @@ export class StateGetAccountInfoSteps {
     public theState_get_account_info_resultContainAValidNamedKeys() {
         console.info("And the state_get_account_info_result contain a valid action thresholds");
         /*  final AccountData stateAccountInfo = contextMap.get(STATE_ACCOUNT_INFO);
-          final JsonNode userAccountJson = nctl.getUserAccount(1);
+          final JsonNode userAccountJson = node.getUserAccount(1);
           assertThat(stateAccountInfo.getAccount().getNamedKeys().size(), is(userAccountJson.at("/stored_value/Account/named_keys").size()));*/
     }
 

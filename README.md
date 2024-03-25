@@ -11,7 +11,7 @@ Points to note are:
 ### How to run locally CLI
 - Install latest node version
 
-- Clone repo and start NCTL (please note the NCTL Casper node version in the script 'docker-run')
+- Clone repo and start CCTL (please note the CCTL Casper node version in the script 'docker-run')
 
   ```bash
   git clone git@github.com:casper-sdks/terminus-js-tests.git
