@@ -14,9 +14,9 @@ else
     git submodule add -f git@github.com:casper-sdks/terminus-test-resources.git ../terminus-test-resources
 fi
 
-if [ -d "../src/test/resources/features" ]
+if [ -d "../src/features" ]
 then
-  rm ../src/tfeatures
+  rm ../src/features
   rm ../src/contracts
   rm ../src/json
 fi
