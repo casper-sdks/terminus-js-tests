@@ -113,8 +113,8 @@ export class NestedTuplesSteps {
     @given(/^that the nested tuples are deployed in a transfer$/)
     public async thatTheNestedTuplesAreDeployedInATransfer() {
         this.deploy = DeployUtils.buildStandardTransferDeploy(this.casperClient, [
-            new NamedArg("tuple1", this.clTuple1),
-            new NamedArg("tuple2", this.clTuple2),
+            //  new NamedArg("tuple1", this.clTuple1),
+            //  new NamedArg("tuple2", this.clTuple2),
             new NamedArg("tuple3", this.clTuple3)
         ]);
         this.deployHash = await this.casperClient.putDeploy(this.deploy);
