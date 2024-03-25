@@ -1,3 +1,29 @@
 #!/usr/bin/env bash
-cd "$(dirname "$0")/.." || exit 1
+cd "$(dirname "$0")" || exit
+echo "Bootstrap installs all dependencies."
+
+echo "Installing features from git@github.com:casper-sdks/terminus-test-resources.git"
+
+if [ -d "../terminus-test-resources/features" ]
+then
+    echo "terminus-test-resources exists fetching submodules."
+    git submodule update --init --recursive
+    git submodule update --remote
+else
+    echo "Cloning terminus-test-resources.git as submodule."
+    git submodule add -f git@github.com:casper-sdks/terminus-test-resources.git ../terminus-test-resources
+fi
+
+if [ -d "../src/features" ]
+then
+  rm ../src/features
+  rm ../src/contracts
+  rm ../src/json
+fi
+
+echo "Creating features symbolic link required for IntelliJ debugging of features"
+ln -s "$(realpath "../terminus-test-resources/features")" ../src/features
+ln -s "$(realpath "../terminus-test-resources/contracts")" ../src/contracts
+ln -s "$(realpath "../terminus-test-resources/json")" ../src/json
+
 npm install
