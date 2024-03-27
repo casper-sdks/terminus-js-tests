@@ -16,7 +16,8 @@ function _bootstrap() {
       git submodule update --remote 2> /dev/null
   else
       echo "[  Cloning terminus-test-resources as submodule  ]"
-      git submodule add -f git@github.com:casper-sdks/terminus-test-resources.git $BASEDIR/terminus-test-resources 2> /dev/null
+#      git submodule add -f git@github.com:casper-sdks/terminus-test-resources.git $BASEDIR/terminus-test-resources 2> /dev/null
+      git submodule add -f git@github.com:casper-sdks/terminus-test-resources.git $BASEDIR/terminus-test-resources
   fi
 
   if [ -d "$BASEDIR/src/features" ]
