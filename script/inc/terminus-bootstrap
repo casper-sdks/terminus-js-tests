@@ -32,7 +32,7 @@ function _bootstrap() {
   ln -s "$(realpath "$BASEDIR/terminus-test-resources/json")" $BASEDIR/src/json
 
   echo "[  Running npm install  ]"
-  npm install /dev/null 2>&1
+  npm install --silent
 
   echo -e "Finished bootstrap\n"
 

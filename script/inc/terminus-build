@@ -18,7 +18,7 @@ function _build() {
   done
 
   echo "[  Removing any existing SDK  ]"
-  npm uninstall casper-js-sdk /dev/null 2>&1
+  npm uninstall casper-js-sdk --silent
 
   echo "[  Removing any existing node modules  ]"
   rm package-lock.json && rm -rf node_modules
@@ -27,7 +27,7 @@ function _build() {
   git clone https://github.com/casper-ecosystem/casper-js-sdk.git -b $BRANCH /dev/null 2>&1
 
   echo "[  Installing SDK  ]"
-  npm install casper-js-sdk /dev/null 2>&1
+  npm install casper-js-sdk --silent
 
   echo -e "Finished build\n"
 
