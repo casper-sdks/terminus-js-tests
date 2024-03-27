@@ -67,7 +67,7 @@ export class NestedOptionsSteps {
         expect(this.deployHash).to.not.be.null;
     }
 
-    @when(/^the Option is read from the deploy$/)
+    @when(/^the nested Option is read from the deploy$/)
     async theOptionIsReadFromTheDeploy() {
         await this.casperClient.getDeploy(this.deployHash).then(deployAndResults => {
             this.deploy = deployAndResults[0];

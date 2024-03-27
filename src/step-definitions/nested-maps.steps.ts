@@ -29,7 +29,7 @@ export class NestedMapsSteps {
 
     @then(/^the map's key type is "([^"]*)" and the maps value type is "([^"]*)"$/)
     public theMapsKeyTypeIsAndTheMapsValueTypeIs(keyType: string, valueType: string) {
-        expect(this.clMap.data[0][0].clType.toString()).to.be.eql(keyType);
+        expect(this.clMap.data[0][0].clType().toString()).to.be.eql(keyType);
         expect(this.clMap.data[0][1].clType().toString()).to.be.eql(valueType);
     }
 

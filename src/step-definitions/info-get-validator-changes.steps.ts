@@ -21,7 +21,7 @@ export class InfoGetValidatorChangesStep {
         console.info("Given that the info_get_validator_changes method is invoked against a node");
 
         // noinspection TypeScriptUnresolvedVariable
-        expect((this.casperClient.nodeClient as any).getValidatorChanges).to.not.be.undefined;
+        expect((this.casperClient.nodeClient as any).getValidatorChanges, 'not implemented in TypeScript client').to.not.be.undefined;
 
         assert.fail('not implemented in TypeScript client');
     }

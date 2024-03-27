@@ -7,6 +7,7 @@ import {BigNumber} from "@ethersproject/bignumber";
 import {AsymmetricKey} from "casper-js-sdk/dist/lib/Keys";
 import {Deploy} from "casper-js-sdk/dist/lib/DeployUtil";
 import {GetDeployResult} from "casper-js-sdk/dist/services";
+import * as fs from "fs";
 
 /**
  * The class that implements the steps for the deploys_generated_keys.feature.
@@ -25,17 +26,63 @@ export class DeploysGeneratedKeysSteps {
         console.info(`Given that a ${algo} sender key is generated`);
 
         let key = this.generateKey(algo);
-
         this.contextMap.put('senderKey', key);
+        this.contextMap.put('algo', algo);
+    }
+
+    @given(/^the key is written to a .pem file$/)
+    public async thatTheKeyIsWritten() {
+        console.info(`the key is written to a .pem file`);
+        let senderKey: AsymmetricKey = this.contextMap.get('senderKey');
+        let pemContents = senderKey.exportPrivateKeyInPem();
+
+        return new Promise<string>((resolve, reject) => {
+
+            fs.writeFile('tmp-secret_key.pem', pemContents, {encoding: 'utf-8'}, (err) => {
+                if (err) {
+                    console.error(`Error writing file: ${err}`);
+                    reject(err);
+                } else {
+                    resolve("done")
+                }
+            });
+        });
+
+
+    }
+
+    @given(/^the key is read from the .pem file$/)
+    public thatTheKeyIsRead() {
+
+        console.info(`the key is read from the .pem file`);
+
+        let algo: string = this.contextMap.get('algo');
+        let loadedKeyPair;
+
+        if (algo === 'Ed25519') {
+            loadedKeyPair = Keys.Ed25519.loadKeyPairFromPrivateFile('tmp-secret_key.pem');
+        } else if (algo === 'Secp256k1') {
+            loadedKeyPair = Keys.Secp256K1.loadKeyPairFromPrivateFile('tmp-secret_key.pem');
+        }
+
+        this.contextMap.put('loadedKeyPair', loadedKeyPair);
+    }
+
+    @given(/the key is the same as the original key$/)
+    public thatKeyIsTheSameAsTheOriginal() {
+        console.info(`the key is the same as the original key`);
+        let loadedKeyPair: Keys.AsymmetricKey = this.contextMap.get('loadedKeyPair');
+        let loadedPrivateKeyBytes = Uint8Array.from(loadedKeyPair.privateKey);
+        let senderKey: Keys.AsymmetricKey = this.contextMap.get('senderKey');
+        let senderPrivateKeyBytes = Uint8Array.from(senderKey.privateKey);
+        expect(loadedPrivateKeyBytes).to.be.eql(senderPrivateKeyBytes);
     }
 
     @given(/^that a "([^"]*)" receiver key is generated$/)
     public thatAReceiverKeyIsGenerated(algo: string) {
 
         console.info(`Given that a ${algo} receiver key is generated`);
-
         let key = this.generateKey(algo);
-
         this.contextMap.put('receiverKey', key);
     }
 
@@ -81,7 +128,7 @@ export class DeploysGeneratedKeysSteps {
         await this.doDeploy(this.contextMap.get('senderKey'), this.contextMap.get('receiverKey'), transferAmount, paymentAmount);
     }
 
-    @then(/^the transfer approvals signer contains the "([^"]*)" algo$/)
+    @then(/^the deploy sender account key contains the "([^"]*)" algo$/)
     public async theReturnedBlockHeaderProposerContainsTheAlgo(algo: string) {
         console.info(`Then the returned block header proposer contains the ${algo} algo`);
 
@@ -91,12 +138,12 @@ export class DeploysGeneratedKeysSteps {
 
         expect(blockInfo).to.not.be.undefined;
 
-        const transferHash =  Uint8Array.from(Buffer.from((blockInfo.block as any).body.transfer_hashes[0], 'hex'));
+        const transferHash = Uint8Array.from(Buffer.from((blockInfo.block as any).body.transfer_hashes[0], 'hex'));
         const transfer: Deploy = this.contextMap.get('deploy');
 
         expect(transferHash).to.be.eql(transfer.hash);
 
-        const algoBytes = transfer.approvals[0].signer.substring(0,2);
+        const algoBytes = transfer.approvals[0].signer.substring(0, 2);
 
         if ('Ed25519' === algo) {
             expect(algoBytes).to.be.eql('01');

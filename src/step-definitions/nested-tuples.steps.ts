@@ -1,5 +1,5 @@
 import {binding, given, then} from "cucumber-tsflow";
-import {CasperClient, CLTuple1, CLTuple2, CLTuple3, CLU32, CLValueParsers, JsonDeploy, NamedArg} from "casper-js-sdk";
+import {CasperClient, CLTuple1, CLTuple2, CLTuple3, CLU32, CLValueParsers, NamedArg} from "casper-js-sdk";
 import {expect} from "chai";
 import {BigNumber} from "@ethersproject/bignumber";
 import {CLValue} from "casper-js-sdk/dist/lib/CLValue/Abstract";
@@ -19,15 +19,14 @@ export class NestedTuplesSteps {
     private casperClient = new CasperClient(TestParameters.getInstance().getRcpUrl());
     private deploy: Deploy = {} as Deploy;
     private deployHash: string = '';
-    private jsonDeploy: JsonDeploy = {} as JsonDeploy
 
-    @given(/^that a nested tuple1 is defined as \(\((\d+)\)\) using U32 numeric value$/)
+    @given(/^that a nested Tuple1 is defined as \(\((\d+)\)\) using U32 numeric values$/)
     public aNestedTuple1IsDefinedAsUsingU32NumericValue(value: number) {
         const innerValue = new CLU32(value);
         this.clTuple1 = new CLTuple1([innerValue]);
     }
 
-    @given(/^that a nested tuple2 is defined as \((\d+), \((\d+), \((\d+), (\d+)\)\)\) using U32 numeric value$/)
+    @given(/^that a nested Tuple2 is defined as \((\d+), \((\d+), \((\d+), (\d+)\)\)\) using U32 numeric values$/)
     public aNestedTuple2IsDefinedAs(value1: number, value2: number, value3: number, value4: number) {
         this.clTuple2 = new CLTuple2(
             [new CLU32(value1),
@@ -37,7 +36,7 @@ export class NestedTuplesSteps {
         );
     }
 
-    @given(/^that a nested tuple3 is defined as \((\d+), (\d+), \((\d+), (\d+), \((\d+), (\d+), (\d+)\)\)\) using U32 numeric value$/)
+    @given(/^that a nested Tuple3 is defined as \((\d+), (\d+), \((\d+), (\d+), \((\d+), (\d+), (\d+)\)\)\) using U32 numeric values$/)
     public aNestedTuple3IsDefinedAs(val1: number,
                                     val2: number,
                                     val3: number,
@@ -91,7 +90,7 @@ export class NestedTuplesSteps {
         expect(secondElement.value()).is.eql(BigNumber.from(value));
     }
 
-    @then(/^the tuple(\d+) bytes are "([^"]*)"$/)
+    @then(/^the Tuple(\d+) bytes are "([^"]*)"$/)
     public theTupleBytesAre(tupleIndex: number, hexBytes: string) {
         const tuple: CLValue = this.getTuple(tupleIndex);
         const actual = CLValueParsers.toBytes(tuple as CLValue).val;
@@ -113,8 +112,8 @@ export class NestedTuplesSteps {
     @given(/^that the nested tuples are deployed in a transfer$/)
     public async thatTheNestedTuplesAreDeployedInATransfer() {
         this.deploy = DeployUtils.buildStandardTransferDeploy(this.casperClient, [
-            //  new NamedArg("tuple1", this.clTuple1),
-            //  new NamedArg("tuple2", this.clTuple2),
+            new NamedArg("tuple1", this.clTuple1),
+            new NamedArg("tuple2", this.clTuple2),
             new NamedArg("tuple3", this.clTuple3)
         ]);
         this.deployHash = await this.casperClient.putDeploy(this.deploy);
@@ -132,14 +131,14 @@ export class NestedTuplesSteps {
         this.clTuple3 = {} as CLTuple3;
 
         await this.casperClient.getDeploy(this.deployHash).then(deployAndResults => {
-            this.jsonDeploy = deployAndResults[1].deploy;
-            this.clTuple1 = DeployUtils.getNamedArgument(this.jsonDeploy, "tuple1")[1];
-            this.clTuple2 = DeployUtils.getNamedArgument(this.jsonDeploy, "tuple2")[1];
-            this.clTuple3 = DeployUtils.getNamedArgument(this.jsonDeploy, "tuple3")[1];
+            let deploy = deployAndResults[0];
+            this.clTuple1 = DeployUtils.getDeployNamedArgument(deploy, "tuple1");
+            this.clTuple2 = DeployUtils.getDeployNamedArgument(deploy, "tuple2");
+            this.clTuple3 = DeployUtils.getDeployNamedArgument(deploy, "tuple3");
         });
     }
 
-    @then(/^the "([^"]*)" element of the Tuple(\d+) is "\(1\)"$/)
+    @then(/^the "([^"]*)" element of the Tuple(\d+) is "\((\d+)\)"$/)
     theNthElementOfTupleNisStr(nth: string, tupleIndex: number, value: string) {
 
         let val: CLValue;
@@ -186,10 +185,22 @@ export class NestedTuplesSteps {
 
     @then(/^the "([^"]*)" element of the Tuple2 is "\((\d+), \((\d+), (\d+)\)\)"$/)
     theNthElementOfTuple2IsStr(nth: string, val1: number, val2: number, val3: number) {
-        expect(this.clTuple2.get(0).value()).to.be.eql(val1);
-        const nested = this.clTuple2.get(1) as CLTuple2;
-        expect(nested.get(0).value()).to.be.eql(val2);
-        expect(nested.get(1).value()).to.be.eql(val3);
+        let index = this.getIndex(nth);
+        expect(this.clTuple2.get(index).value()[0].value().toNumber()).to.be.eql(val1);
+        const nested = this.clTuple2.get(index).value()[1] as CLTuple2;
+        expect(nested.get(0).value().toNumber()).to.be.eql(val2);
+        expect(nested.get(1).value().toNumber()).to.be.eql(val3);
+    }
+
+    @then(/^the "([^"]*)" element of the Tuple3 is "\((\d+), (\d+), \((\d+), (\d+), (\d+)\)\)"$/)
+    theNthElementOfTuple3IsStr(nth: string, val1: number, val2: number, val3: number, val4: number, val5: number) {
+        let index = this.getIndex(nth);
+        expect(this.clTuple3.get(index).value()[0].value().toNumber()).to.be.eql(val1);
+        expect(this.clTuple3.get(index).value()[1].value().toNumber()).to.be.eql(val2);
+        let nested = this.clTuple3.get(index).value()[2] as CLTuple3;
+        expect(nested.get(0).value().toNumber()).to.be.eql(val3);
+        expect(nested.get(1).value().toNumber()).to.be.eql(val4);
+        expect(nested.get(2).value().toNumber()).to.be.eql(val5);
     }
 
     private getIndex(nth: string): number {
@@ -197,6 +208,8 @@ export class NestedTuplesSteps {
             return 0;
         } else if ("second" == nth) {
             return 1;
+        } else if ("third" == nth) {
+            return 2;
         } else {
             throw new Error("Invalid index: " + nth);
         }
@@ -214,5 +227,5 @@ export class NestedTuplesSteps {
                 throw "Invalid tuple index: " + tupleIndex;
         }
     }
-
 }
+

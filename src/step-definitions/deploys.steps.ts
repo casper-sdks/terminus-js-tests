@@ -1,16 +1,7 @@
 import {binding, given, then, when} from 'cucumber-tsflow';
-import {assert, expect} from "chai";
+import {expect} from "chai";
 import {ContextMap} from "../utils/context-map";
-import {
-    CasperClient,
-    CLPublicKey,
-    CLTypeTag,
-    DeployUtil,
-    Keys,
-    OPTION_TYPE,
-    PUBLIC_KEY_TYPE,
-    U512_TYPE
-} from "casper-js-sdk";
+import {CasperClient, CLPublicKey, DeployUtil, Keys} from "casper-js-sdk";
 import {BigNumber} from '@ethersproject/bignumber';
 import {Deploy} from "casper-js-sdk/dist/lib/DeployUtil";
 import {GetDeployResult} from "casper-js-sdk/dist/services";
@@ -93,7 +84,7 @@ export class DeploysSteps {
             this.contextMap.put("deployResult", deployResult);
         });
 
-        this.contextMap.put('putDeploy', deploy);
+        this.contextMap.put('deploy', deploy);
 
         expect(this.contextMap.get('deployResult')).to.not.be.null;
     }
@@ -117,14 +108,14 @@ export class DeploysSteps {
         const deployHash: string = this.contextMap.get("deployResult");
 
         await EventUtils.waitForABlockAddedEventWithATimoutOfSeconds(this.casperClient, deployHash, timeout).then(event => {
-            this.contextMap.put('lastBlockAdded', event.body.BlockAdded);
+            this.contextMap.put('blockHash', event.body.BlockAdded.block.hash);
         });
 
-        const blockAdded = this.contextMap.get('lastBlockAdded') as any;
+        const blockHash = this.contextMap.get('blockHash') as any;
 
         let block: any | null = null;
 
-        await this.casperClient.nodeClient.getBlockInfo(blockAdded.block.hash).then(blockResult => {
+        await this.casperClient.nodeClient.getBlockInfo(blockHash).then(blockResult => {
             block = blockResult.block as any;
         });
 
@@ -173,12 +164,12 @@ export class DeploysSteps {
     @then(/^the deploy execution result has "([^"]*)" block hash$/)
     public theDeployExecutionResultHasBlockHash(blockName: string) {
         console.info(`Then the the deploy execution result has ${blockName} block hash`);
-        const blockAdded: any = this.contextMap.get(blockName);
+        const blockAdded: any = this.contextMap.get('blockHash');
         expect(blockAdded).to.not.be.undefined;
 
         const result: GetDeployResult = this.contextMap.get('result');
         expect(result).to.not.be.undefined;
-        expect(result.execution_results[0].block_hash).to.eql(blockAdded.block_hash);
+        expect(result.execution_results[0].block_hash).to.eql(blockAdded);
     }
 
     @then(/^the deploy execution has a cost of (\d+) motes$/)
@@ -194,7 +185,7 @@ export class DeploysSteps {
         expect(actualCost).to.eql(cost);
     }
 
-    @then( /^the deploy has a payment amount of (\d+)$/)
+    @then(/^the deploy has a payment amount of (\d+)$/)
     public theDeployHasAPaymentAmountOf(amount: number) {
 
         console.info(`Then the deploy has a payment amount of ${amount}`);
@@ -212,7 +203,7 @@ export class DeploysSteps {
         const deploy: Deploy = this.contextMap.get('deploy');
         expect(deploy).to.not.be.undefined;
 
-        const putDeploy: Deploy = this.contextMap.get('putDeploy');
+        const putDeploy: Deploy = this.contextMap.get('deploy');
         expect(putDeploy).to.not.be.undefined;
 
         expect(deploy.hash).to.eql(putDeploy.hash);
@@ -226,7 +217,7 @@ export class DeploysSteps {
         const deploy: Deploy = this.contextMap.get('deploy');
         expect(deploy).to.not.be.undefined;
 
-        const putDeploy: Deploy = this.contextMap.get('putDeploy');
+        const putDeploy: Deploy = this.contextMap.get('deploy');
         expect(putDeploy).to.not.be.undefined;
         expect(deploy.header.timestamp).to.eql(putDeploy.header.timestamp);
     }
@@ -239,7 +230,7 @@ export class DeploysSteps {
         const deploy: Deploy = this.contextMap.get('deploy');
         expect(deploy).to.not.be.undefined;
 
-        const putDeploy: Deploy = this.contextMap.get('putDeploy');
+        const putDeploy: Deploy = this.contextMap.get('deploy');
         expect(putDeploy).to.not.be.undefined;
         expect(deploy.header.bodyHash).to.eql(putDeploy.header.bodyHash);
     }
