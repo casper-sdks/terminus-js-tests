@@ -1,0 +1,71 @@
+DOCKER_NAME="cspr-cctl"
+CCTL_ASSETS=/home/cctl/cctl/assets
+
+function _docker() {
+
+  echo -e "Running node\n"
+
+  shift
+  while getopts "n:" option; do
+     case $option in
+        n)
+          NODE=$OPTARG;;
+       \?)
+           echo "Error: Invalid option"
+           exit;;
+     esac
+  done
+
+  if ! [ -x "$(command -v docker)" ]; then
+    echo 'Error: docker is not installed.' >&2
+    exit 1
+  fi
+
+  echo "[  Stopping and removing any running image  ]"
+  docker stop $DOCKER_NAME > /dev/null 2>&1 && docker rm -fv $DOCKER_NAME > /dev/null 2>&1
+
+  echo "[  Starting image  ]"
+  docker run --rm -it --name $DOCKER_NAME -d -p 25101:25101 -p 11101:11101 -p 14101:14101 -p 18101:18101 "$NODE" > /dev/null 2>&1
+
+  res=$( docker exec -t $DOCKER_NAME  /bin/bash -c -i 'cctl-infra-net-status'  |  awk '{print $1}')
+  while [[ $res == *"Error"* ]]
+  do
+    echo -ne "[  Waiting for test node to start....  ]\r\n"
+    res=$( docker exec -t $DOCKER_NAME  /bin/bash -c -i 'cctl-infra-net-status'  |  awk '{print $1}')
+  done
+
+  echo "[  Image started  ]"
+
+  res=$( docker exec -t $DOCKER_NAME  /bin/bash -c -i 'cctl-chain-view-block'  |  awk '{print $1}')
+  while [[ $res == *"parse"* ]]
+  do
+    echo -ne "[  Waiting for a block to be added....  ]\r\n"
+    res=$( docker exec -t $DOCKER_NAME  /bin/bash -c -i 'cctl-chain-view-block'  |  awk '{print $1}')
+  done
+
+  echo ""
+  echo -e "Finished node\n"
+
+}
+
+function _assets() {
+
+  echo -e "Starting assets\n"
+  echo -e "[  Copying the test node assets to a local directory  ]\n"
+
+  # clear the assets folder
+  rm -rf  "${BASEDIR}"/assets
+  mkdir "${BASEDIR}"/assets
+  mkdir "${BASEDIR}"/assets/net-1
+  mkdir "${BASEDIR}"/assets/chainspec
+  mkdir "${BASEDIR}"/assets/faucet
+  # copy net-1 users
+  docker cp cspr-cctl:$CCTL_ASSETS/users/. "${BASEDIR}"/assets/net-1 > /dev/null 2>&1
+  # copy net-1 chainspec
+  docker cp cspr-cctl:$CCTL_ASSETS/genesis "${BASEDIR}"/assets/net-1/chainspec > /dev/null 2>&1
+  # copy faucet keys
+  docker cp cspr-cctl:$CCTL_ASSETS/faucet/ "${BASEDIR}"/assets/net-1/faucet > /dev/null 2>&1
+
+  echo -e "Finished assets\n"
+
+}

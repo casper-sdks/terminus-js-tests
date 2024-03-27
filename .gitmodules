@@ -1,3 +1,6 @@
 [submodule "terminus-test-resources"]
 	path = terminus-test-resources
 	url = git@github.com:casper-sdks/terminus-test-resources.git
+[submodule "/Users/carl/Documents/Workspace/Casper/terminus/terminus-js-tests/terminus-test-resources"]
+	path = /Users/carl/Documents/Workspace/Casper/terminus/terminus-js-tests/terminus-test-resources
+	url = git@github.com:casper-sdks/terminus-test-resources.git

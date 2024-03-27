@@ -1,0 +1,36 @@
+function _build() {
+
+  echo -e "Running build\n"
+
+  cd "$BASEDIR" || exit
+
+  shift
+  while getopts "b:n:" option; do
+     case $option in
+        b)
+          BRANCH=$OPTARG;;
+        n)
+          NODE=$OPTARG;;
+       \?)
+           echo "Error: Invalid option"
+           exit;;
+     esac
+  done
+
+  echo "[  Removing any existing SDK  ]"
+  npm uninstall casper-js-sdk /dev/null 2>&1
+
+  echo "[  Removing any existing node modules  ]"
+  rm package-lock.json && rm -rf node_modules
+
+  echo "[  Cloning required SDK branch  ]"
+  git clone https://github.com/casper-ecosystem/casper-js-sdk.git -b $BRANCH /dev/null 2>&1
+
+  echo "[  Installing SDK  ]"
+  npm install casper-js-sdk /dev/null 2>&1
+
+  echo -e "Finished build\n"
+
+  exit 0
+
+}
