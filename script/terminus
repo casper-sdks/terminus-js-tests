@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+BASEDIR=$(builtin cd ..; pwd)
+
+# ----------------------------------------------------------------
+# DEFAULTS
+# ----------------------------------------------------------------
+
+NODE="stormeye2000/cspr-cctl:release-1.5.6"
+BRANCH='dev'
+
+# ----------------------------------------------------------------
+# INCLUDES
+# ----------------------------------------------------------------
+
+source inc/terminus-bootstrap
+source inc/terminus-help
+source inc/terminus-node
+source inc/terminus-build
+source inc/terminus-test
+
+# ----------------------------------------------------------------
+# ENTRY POINT
+# ----------------------------------------------------------------
+
+for ARGUMENT in "$@"
+do
+    CMD=$(echo "$ARGUMENT" | cut -f1 -d=)
+    case "$CMD" in
+        build)
+           _bootstrap
+           _docker
+           _assets
+           _build "$@"
+           ;;
+        help)
+           _help
+           ;;
+        node)
+          _docker "$@"
+          _assets
+          ;;
+        test)
+           _test "$@"
+           ;;
+        assets)
+           _assets
+           ;;
+        bootstrap)
+           _bootstrap
+           ;;
+        list)
+           _list
+           ;;
+        *)
+          echo 'Unrecognised command. Options are help, node, assets, init and test';;
+    esac
+done
+
+
+
+
+

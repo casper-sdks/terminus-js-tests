@@ -1,0 +1,39 @@
+function _bootstrap() {
+
+  echo -e "Running bootstrap\n"
+
+  if ! [ -x "$(command -v npm)" ]; then
+    echo 'Error: npm is not installed.' >&2
+    exit 1
+  fi
+
+  echo "[  Installing features from git@github.com:casper-sdks/terminus-test-resources.git  ]"
+
+  if [ -d "$BASEDIR/terminus-test-resources/features" ]
+  then
+      echo "[  Updating terminus-test-resources submodules  ]"
+      git submodule update --init --recursive 2> /dev/null
+      git submodule update --remote 2> /dev/null
+  else
+      echo "[  Cloning terminus-test-resources as submodule  ]"
+      git submodule add -f git@github.com:casper-sdks/terminus-test-resources.git $BASEDIR/terminus-test-resources 2> /dev/null
+  fi
+
+  if [ -d "$BASEDIR/src/features" ]
+  then
+    rm $BASEDIR/src/features
+    rm $BASEDIR/src/contracts
+    rm $BASEDIR/src/json
+  fi
+
+  echo "[  Creating features symbolic links  ]"
+  ln -s "$(realpath "$BASEDIR/terminus-test-resources/features")" $BASEDIR/src/features
+  ln -s "$(realpath "$BASEDIR/terminus-test-resources/contracts")" $BASEDIR/src/contracts
+  ln -s "$(realpath "$BASEDIR/terminus-test-resources/json")" $BASEDIR/src/json
+
+  echo "[  Running npm install  ]"
+  npm install --silent
+
+  echo -e "Finished bootstrap\n"
+
+}

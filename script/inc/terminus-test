@@ -1,0 +1,50 @@
+
+function _test() {
+
+  FEATURES_PATH=/src/features/
+
+  shift
+  while getopts "f:" option; do
+     case $option in
+        f)
+          FEATURE=$OPTARG;;
+       \?)
+         echo "Error: Invalid option"
+         exit;;
+     esac
+  done
+
+  cd "$BASEDIR" || exit
+
+  if ! [ -z "$FEATURE" ]; then
+    if ! [ -f "$BASEDIR""$FEATURES_PATH""$FEATURE" ]; then
+      echo -e "[  Feature $FEATURE does not exist  ]\n"
+      _list
+      exit 1
+    fi
+  fi
+
+  if [ -z "${FEATURE}" ]
+  then
+        echo -e "[  Running tests against all features  ]\n"
+        npm test
+  else
+        echo -e "[  Running tests against $FEATURE feature  ]\n"
+        npm test "$BASEDIR""$FEATURES_PATH""$FEATURE"
+  fi
+
+  echo -e "[  Tests finished  ]\n"
+
+  exit 0
+
+}
+
+function _list() {
+
+    echo -e "[  Available features  ]\n"
+    FILES=$(find "$BASEDIR""$FEATURES_PATH" -name "*.feature")
+    for FILE in $FILES; do
+      echo "["  "${FILE##*/}"  "]"
+    done;
+
+}
