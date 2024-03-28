@@ -6,5 +6,5 @@
 /src/contracts
 /src/features
 /src/json
-/terminus-test-resources/
+/terminus-test-resources
 package-lock.json

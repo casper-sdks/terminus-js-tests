@@ -8,30 +8,46 @@ Points to note are:
 - The tests are built using Cucumber features
 
 
-### How to run locally CLI
+### How to run locally
 - Install latest node version
 
-- Clone repo and start CCTL (please note the CCTL Casper node version in the script 'docker-run')
+- Clone the repo and build the test project
 
   ```bash
   git clone git@github.com:casper-sdks/terminus-js-tests.git
-  cd terminus-js-tests/scripts
-  chmod +x docker-run && ./docker-run
-  chmod +x docker-copy-assets && /docker-copy-assets 
-  cd ..
+  
+  cd terminus-js-tests/script && chmod +x terminus
+  
+  ./terminus build
   ```
 
-- npm install required SDK branch and run the tests
+- The default SDK branch and node docker location can be overridden in the terminus init command 
 
   ```bash
-  npm uninstall casper-js-sdk
-  rm package-lock.json && rm -rf node_modules
-  git clone https://github.com/casper-ecosystem/casper-js-sdk.git -b [required-branch]
-  npm install casper-js-sdk
-  npm test
+  ./terminus build -b release-2.15.4 -n cctl:latest
+  ```
+  
+- To run the test features:
+
+  ```bash
+  ./terminus test
   ```
 
-- TODO script the above
+- To list the available test features:
+
+- ```bash
+  ./terminus list
+  ```
+
+- To run an individual test feature:
+
+- ```bash
+  ./terminus test -f [ feature ]
+  # example
+  ./terminus test -f deploys.feature
+  ```
+
+  
 
 - JUnit test results will be output to /reports
 
