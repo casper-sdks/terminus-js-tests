@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "casper-js-sdk": "^2.15.4",
-    "cucumber": "^6.0.7"
+    "cucumber": "^6.0.7",
+    "help": "^3.0.2"
   }
 }
