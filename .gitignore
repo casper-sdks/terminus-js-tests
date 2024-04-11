@@ -6,4 +6,4 @@
 /src/contracts
 /src/features
 /src/json
-package-lock.json
+/tmp-secret_key.pem

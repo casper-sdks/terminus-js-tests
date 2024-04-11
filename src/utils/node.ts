@@ -42,7 +42,7 @@ export class Node {
     }
 
     public getChainBlockTransfers(blockHash: string): any {
-        const json = this.exec('view_chain_block_transfers.sh', 'block=' + blockHash);
+        const json = this.exec('cctl-chain-view-block', 'block=' + blockHash);
         return JSON.parse(json);
     }
 
