@@ -166,7 +166,7 @@ export class DeploysGeneratedKeysSteps {
         const standardPayment = DeployUtil.standardPayment(BigNumber.from(payment));
         expect(standardPayment).to.not.be.undefined;
 
-        const deployParams = new DeployUtil.DeployParams(senderKeyPair.publicKey, TestParameters.getInstance().getChainName, gasPrice, ttl);
+        const deployParams = new DeployUtil.DeployParams(senderKeyPair.publicKey, TestParameters.getInstance().chainName, gasPrice, ttl);
 
         const deploy = DeployUtil.makeDeploy(deployParams, transfer, standardPayment);
 

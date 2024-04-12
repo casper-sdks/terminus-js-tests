@@ -43,7 +43,7 @@ export class TestParameters {
     public get dockerName(): string {
         return this._dockerName;
     }
-    public get getChainName(): string {
+    public get chainName(): string {
         return this._chainName;
     }
 

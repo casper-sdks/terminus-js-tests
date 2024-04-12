@@ -47,7 +47,7 @@ export class WasmSteps {
         const tokenName = 'Acme Token';
         const tokenSymbol = 'ACME';
         const tokenDecimals = 11;
-        const chainName = TestParameters.getInstance().getChainName
+        const chainName = TestParameters.getInstance().chainName
         const tokenTotalSupply = '500000000000';
 
         const args = RuntimeArgs.fromMap({
@@ -192,7 +192,7 @@ export class WasmSteps {
         });
 
         const deploy = DeployUtil.makeDeploy(
-            new DeployUtil.DeployParams(faucetKey.publicKey, TestParameters.getInstance().getChainName, 1, ttl),
+            new DeployUtil.DeployParams(faucetKey.publicKey, TestParameters.getInstance().chainName, 1, ttl),
 
             DeployUtil.ExecutableDeployItem.newStoredContractByHash(
                 Uint8Array.from(Buffer.from(contractHash, 'hex')),
@@ -237,7 +237,7 @@ export class WasmSteps {
         });
 
         const deploy = DeployUtil.makeDeploy(
-            new DeployUtil.DeployParams(faucetKey.publicKey, TestParameters.getInstance().getChainName, 1, ttl),
+            new DeployUtil.DeployParams(faucetKey.publicKey, TestParameters.getInstance().chainName, 1, ttl),
 
             DeployUtil.ExecutableDeployItem.newStoredContractByName(
                 contractName,
@@ -270,7 +270,7 @@ export class WasmSteps {
         });
 
         const deploy = DeployUtil.makeDeploy(
-            new DeployUtil.DeployParams(faucetKey.publicKey, TestParameters.getInstance().getChainName, 1, ttl),
+            new DeployUtil.DeployParams(faucetKey.publicKey, TestParameters.getInstance().chainName, 1, ttl),
 
             DeployUtil.ExecutableDeployItem.newStoredVersionContractByHash(
                 Uint8Array.from(Buffer.from(contractHash, 'hex')),
@@ -301,7 +301,7 @@ export class WasmSteps {
         });
 
         const deploy = DeployUtil.makeDeploy(
-            new DeployUtil.DeployParams(faucetKey.publicKey, TestParameters.getInstance().getChainName, 1, ttl),
+            new DeployUtil.DeployParams(faucetKey.publicKey, TestParameters.getInstance().chainName, 1, ttl),
 
             DeployUtil.ExecutableDeployItem.newStoredVersionContractByName(
                 contractName,
