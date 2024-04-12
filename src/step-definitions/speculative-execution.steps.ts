@@ -27,7 +27,7 @@ export class SpeculativeExecutionSteps {
 
         const latestBlockInfo = await this.casperRcpClient.nodeClient.getLatestBlockInfo();
 
-        this.speculativeDeployData = await this.casperSpxClient.speculativeDeploy( this.deploy, {Hash: (<JsonBlock>latestBlockInfo.block).hash});
+        this.speculativeDeployData = await this.casperSpxClient.speculativeDeploy(this.deploy, {Hash: (<JsonBlock>latestBlockInfo.block).hash});
     }
 
     @then(/^the speculative_exec has an api_version of "([^"]*)"$/)
@@ -71,39 +71,74 @@ export class SpeculativeExecutionSteps {
     }
 
     @then(/^the speculative_exec execution_result transform with the transfer key has the "([^"]*)" field set to the "([^"]*)" account hash$/)
-    public the_speculative_exec_execution_result_transform_with_the_transfer_key_has_the_field_set_to_the_account_hash(fieldName: string, account: string) {
+    public the_speculative_exec_execution_result_transform_with_the_transfer_key_has_the_field_set_to_the_account_hash(fieldName: string, accountId: string) {
+
+        const accountHash = "account-hash-" + this.getAccountHash(accountId);
         const transform = this.getTransform("transfer");
-      // TODO  expect(transform.transform.WriteTransfer.amount).to.be.eql(amount.toString());
+        if (fieldName === "from") {
+            expect(transform.transform.WriteTransfer.from).to.be.eql(accountHash);
+        } else {
+            expect(transform.transform.WriteTransfer.to).to.be.eql(accountHash);
+        }
     }
 
 
-
     @then(/^the speculative_exec execution_result transform with the transfer key has the "([^"]*)" field set to the purse uref of the "([^"]*)" account$/)
-    public the_speculative_exec_execution_result_transform_with_the_transfer_key_has_the_field_set_to_the_purse_uref_of_the_account(fieldName: string, account: string) {
+    public async the_speculative_exec_execution_result_transform_with_the_transfer_key_has_the_field_set_to_the_purse_uref_of_the_account(fieldName: string, accountId: string) {
+
+        const purse: string = await this.getAccountPurse(accountId) as string
+
+        const transform = this.getTransform("transfer");
+
+        if (fieldName === "source") {
+            expect(transform.transform.WriteTransfer.source).to.be.eql(purse);
+        } else {
+            expect(transform.transform.WriteTransfer.target.split("-")[0]).to.be.eql(purse.split("-")[0]);
+            expect(transform.transform.WriteTransfer.target.split("-")[1]).to.be.eql(purse.split("-")[1]);
+        }
     }
 
     @then(/^the speculative_exec execution_result transform with the deploy key has the deploy_hash of the transfer's hash$/)
     public the_speculative_exec_execution_result_transform_with_the_deploy_key_has_the_deploy_hash_of_the_transfer_s_hash() {
+        const hash = Buffer.from(this.deploy.hash).toString('hex');
+        const transform = this.getDeployTransform();
+        expect(transform.transform.WriteDeployInfo.deploy_hash).to.be.eql(hash);
     }
+
 
     @then(/^the speculative_exec execution_result transform with a deploy key has a gas field of (\d+)$/)
-    public the_speculative_exec_execution_result_transform_with_a_deploy_key_has_a_gas_field_of(arg1: number) {
+    public the_speculative_exec_execution_result_transform_with_a_deploy_key_has_a_gas_field_of(gas: number) {
+        const transform = this.getDeployTransform();
+        expect(transform.transform.WriteDeployInfo.gas).to.be.eql(gas.toString());
     }
 
+
     @then(/^the speculative_exec execution_result transform with a deploy key has (\d+) transfer with a valid transfer hash$/)
-    public the_speculative_exec_execution_result_transform_with_a_deploy_key_has_transfer_with_a_valid_transfer_hash(arg1: number) {
+    public the_speculative_exec_execution_result_transform_with_a_deploy_key_has_transfer_with_a_valid_transfer_hash(transfers: number) {
+        const transform = this.getDeployTransform();
+        expect(transform.transform.WriteDeployInfo.transfers.length).to.be.eql(transfers);
     }
 
     @then(/^the speculative_exec execution_result transform with a deploy key has as from field of the "([^"]*)" account hash$/)
-    public the_speculative_exec_execution_result_transform_with_a_deploy_key_has_as_from_field_of_the_account_hash(arg1: string) {
+    public the_speculative_exec_execution_result_transform_with_a_deploy_key_has_as_from_field_of_the_account_hash(faucet: string) {
+        const transform = this.getDeployTransform();
+        expect(transform.transform.WriteDeployInfo.from).to.be.eql("account-hash-" + this.getAccountHash(faucet));
     }
 
     @then(/^the speculative_exec execution_result transform with a deploy key has as source field of the "([^"]*)" account purse uref$/)
-    public the_speculative_exec_execution_result_transform_with_a_deploy_key_has_as_source_field_of_the_account_purse_uref(arg1: string) {
+    public async the_speculative_exec_execution_result_transform_with_a_deploy_key_has_as_source_field_of_the_account_purse_uref(faucet: string) {
+        const transform = this.getDeployTransform();
+        const faucetPurse = await this.getAccountPurse(faucet);
+        expect(transform.transform.WriteDeployInfo.source).to.be.eql(faucetPurse);
     }
 
+
     @then(/^the speculative_exec execution_result contains at least (\d+) valid balance transforms$/)
-    public the_speculative_exec_execution_result_contains_at_least_valid_balance_transforms(arg1: number) {
+    public async the_speculative_exec_execution_result_contains_at_least_valid_balance_transforms(min: number) {
+        const transforms = await this.getFaucetBalanceTransform();
+
+        expect(transforms).to.not.be.null;
+
     }
 
     @then(/^the speculative_exec execution_result 1st balance transform is an Identity transform$/)
@@ -119,10 +154,48 @@ export class SpeculativeExecutionSteps {
 
     }
 
-    private getTransform(key: string) : any {
-
+    private getTransform(key: string): any {
         return this.speculativeDeployData.execution_result.Success.effect.transforms.find((transform: any) => {
             return transform.key.startsWith(key);
         });
+    }
+
+    private getAccountHash(accountId: string): string {
+        return Buffer.from(this.getAccountKey(accountId).publicKey.toAccountHash()).toString('hex');
+    }
+
+    private getAccountKey(accountId: string): Keys.AsymmetricKey {
+        if (accountId === "faucet") {
+            return this.casperSpxClient.loadKeyPairFromPrivateFile(
+                `./assets/net-1/${accountId}/secret_key.pem`,
+                Keys.SignatureAlgorithm.Ed25519
+            );
+        } else {
+            return this.casperSpxClient.loadKeyPairFromPrivateFile(
+                `./assets/net-1/user-1/secret_key.pem`,
+                Keys.SignatureAlgorithm.Ed25519
+            );
+        }
+    }
+
+    private async getAccountPurse(accountId: string) {
+        const key = this.getAccountKey(accountId);
+        return this.casperRcpClient.getAccountMainPurseUref(key.publicKey)
+    }
+
+    private getDeployTransform() {
+        const hash = Buffer.from(this.deploy.hash).toString('hex');
+        const key = "deploy-" + hash;
+        const transform = this.getTransform(key);
+        expect(transform).to.not.be.null;
+        return transform;
+    }
+
+    private async getFaucetBalanceTransform() {
+        const purse = <string>await this.getAccountPurse("faucet");
+        const key = "balance-" + purse.split("-")[1];
+        return Promise.resolve(this.speculativeDeployData.execution_result.Success?.effect.transforms.find((transform: any) => {
+            return transform.key === key;
+        }))
     }
 }
