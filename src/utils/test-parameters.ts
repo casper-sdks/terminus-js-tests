@@ -7,6 +7,7 @@ export class TestParameters {
     private static DEFAULT_RCP_PORT = '11101';
     private static DEFAULT_REST_PORT = '1401';
     private static DEFAULT_SSE_PORT = '18101';
+    private static DEFAULT_SPX_PORT = '25101';
     private static DEFAULT_DOCKER_NAME = 'cspr-cctl';
     private static DEFAULT_CHAIN_NAME = 'cspr-dev-cctl';
     private static instance = new TestParameters();
@@ -15,6 +16,7 @@ export class TestParameters {
     private rcpPort = TestParameters.DEFAULT_RCP_PORT;
     private restPort = TestParameters.DEFAULT_REST_PORT;
     private ssePort = TestParameters.DEFAULT_SSE_PORT;
+    private spxPort = TestParameters.DEFAULT_SPX_PORT;
     private _chainName = TestParameters.DEFAULT_CHAIN_NAME;
 
     private constructor() {
@@ -34,6 +36,11 @@ export class TestParameters {
     public getRcpUrl(): string {
         // noinspection HttpUrlsUsage
         return 'http://' + this.hostname + ':' + this.rcpPort + '/rpc';
+    }
+
+    public getSpxUrl(): string {
+        // noinspection HttpUrlsUsage
+        return 'http://' + this.hostname + ':' + this.spxPort + '/rpc';
     }
 
     public getEventsBaseUrl() {
@@ -64,6 +71,9 @@ export class TestParameters {
             case 'cspr.port.rcp':
                 this.rcpPort = val;
                 break;
+            case 'cspr.port.spx':
+                this.spxPort = val;
+                break;
             case 'cspr.port.rest':
                 this.restPort = val;
                 break;
@@ -82,5 +92,9 @@ export class TestParameters {
 
     public getRcpPort(): number {
         return +this.rcpPort;
+    }
+
+    public getSpxPort(): number {
+        return +this.spxPort;
     }
 }
