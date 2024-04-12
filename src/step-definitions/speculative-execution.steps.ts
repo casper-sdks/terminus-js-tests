@@ -112,7 +112,6 @@ export class SpeculativeExecutionSteps {
         expect(transform.transform.WriteDeployInfo.gas).to.be.eql(gas.toString());
     }
 
-
     @then(/^the speculative_exec execution_result transform with a deploy key has (\d+) transfer with a valid transfer hash$/)
     public the_speculative_exec_execution_result_transform_with_a_deploy_key_has_transfer_with_a_valid_transfer_hash(transfers: number) {
         const transform = this.getDeployTransform();
@@ -138,20 +137,24 @@ export class SpeculativeExecutionSteps {
         const transforms = await this.getFaucetBalanceTransform();
 
         expect(transforms).to.not.be.null;
-
     }
 
     @then(/^the speculative_exec execution_result 1st balance transform is an Identity transform$/)
-    public the_speculative_exec_execution_result_1st_balance_transform_is_an_identity_transform() {
+    public async the_speculative_exec_execution_result_1st_balance_transform_is_an_identity_transform() {
+        const transforms = await this.getFaucetBalanceTransform();
+        expect(transforms[0].transform).to.be.eql("Identity");
     }
 
     @then(/^the speculative_exec execution_result last balance transform is an Identity transform is as WriteCLValue of type "([^"]*)"$/)
-    public the_speculative_exec_execution_result_last_balance_transform_is_an_identity_transform_is_as_writeclvalue_of_type(arg1: string) {
+    public async the_speculative_exec_execution_result_last_balance_transform_is_an_identity_transform_is_as_writeclvalue_of_type(type: string) {
+        const transforms = await this.getFaucetBalanceTransform()
+        expect(transforms[transforms.length - 1].transform.WriteCLValue.cl_type).to.be.eql(type);
     }
 
     @given(/^the speculative_exec execution_result contains a valid AddUInt512 transform with a value of (\d+)$/)
-    public the_speculative_exec_execution_result_contains_a_valid_adduint512_transform_with_a_value_of(arg1: number) {
-
+    public async the_speculative_exec_execution_result_contains_a_valid_adduint512_transform_with_a_value_of(value: number) {
+        const transforms = await this.getFaucetBalanceTransform()
+        expect(+transforms[transforms.length - 1].transform.WriteCLValue.parsed).to.be.gt(value);
     }
 
     private getTransform(key: string): any {
@@ -194,8 +197,8 @@ export class SpeculativeExecutionSteps {
     private async getFaucetBalanceTransform() {
         const purse = <string>await this.getAccountPurse("faucet");
         const key = "balance-" + purse.split("-")[1];
-        return Promise.resolve(this.speculativeDeployData.execution_result.Success?.effect.transforms.find((transform: any) => {
+        return Promise.resolve(this.speculativeDeployData.execution_result.Success?.effect.transforms.filter((transform: any) => {
             return transform.key === key;
-        }))
+        }));
     }
 }
