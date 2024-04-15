@@ -18,7 +18,7 @@ export class BlocksSteps {
     private contextMap = ContextMap.getInstance();
     private node = new Node(TestParameters.getInstance().dockerName);
     private casperClient = new CasperClient(TestParameters.getInstance().getRcpUrl());
-    private chainName = TestParameters.getInstance().getChainName;
+    private chainName = TestParameters.getInstance().chainName;
 
     @given(/^that the latest block is requested via the sdk$/)
     public async thatTheLatestBlockIsRequestedViaTheSdk() {
@@ -230,7 +230,7 @@ export class BlocksSteps {
         const standardPayment = DeployUtil.standardPayment(BigNumber.from(100000000));
         expect(standardPayment).to.not.be.undefined;
 
-        const deployParams = new DeployUtil.DeployParams(senderKeyPair.publicKey, TestParameters.getInstance().getChainName, gasPrice, ttl);
+        const deployParams = new DeployUtil.DeployParams(senderKeyPair.publicKey, TestParameters.getInstance().chainName, gasPrice, ttl);
         const deploy = DeployUtil.makeDeploy(deployParams, transfer, standardPayment);
 
         this.casperClient.signDeploy(deploy, senderKeyPair);

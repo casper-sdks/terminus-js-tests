@@ -51,7 +51,7 @@ export class InfoGetStatusSteps {
         const statusData: any = this.contextMap.get('statusData');
 
         // noinspection TypeScriptUnresolvedVariable
-        expect(statusData.chainspec_name).to.eql(TestParameters.getInstance().getChainName);
+        expect(statusData.chainspec_name).to.eql(TestParameters.getInstance().chainName);
     }
 
     @then(/^the info_get_status_result has a valid last_added_block_info$/)
