@@ -1,11 +1,10 @@
 import {ContextMap} from "../utils/context-map";
 import {Node} from "../utils/node";
 import {TestParameters} from "../utils/test-parameters";
-import {CasperClient, DeployUtil, encodeBase16, Keys} from "casper-js-sdk";
+import {CasperClient} from "casper-js-sdk";
 import {expect} from "chai";
-import {binding, given, then, when} from "cucumber-tsflow";
-import {BigNumber} from "@ethersproject/bignumber";
-import {Deploy} from "casper-js-sdk/dist/lib/DeployUtil";
+import {binding, given, then} from "cucumber-tsflow";
+import {SimpleRpcClient} from "../utils/simple-rpc-client";
 
 /**
  * The steps for the blocks feature
@@ -19,6 +18,11 @@ export class BlocksSteps {
     private node = new Node(TestParameters.getInstance().dockerName);
     private casperClient = new CasperClient(TestParameters.getInstance().getRcpUrl());
     private chainName = TestParameters.getInstance().chainName;
+    private simpleRpcClient = new SimpleRpcClient(
+        TestParameters.getInstance().getHostname(),
+        TestParameters.getInstance().getRcpPort()
+    );
+
 
     @given(/^that the latest block is requested via the sdk$/)
     public async thatTheLatestBlockIsRequestedViaTheSdk() {
@@ -26,8 +30,8 @@ export class BlocksSteps {
         console.info("Given that the latest block is requested via the sdk");
 
         await this.casperClient.nodeClient.getLatestBlockInfo().then(latestBlock => {
-            this.contextMap.put("blockDataSdk", latestBlock);
-            this.contextMap.put("latestBlock", (<any>latestBlock).block.hash);
+            this.contextMap.put("blockDataSdk", latestBlock.block_with_signatures);
+            this.contextMap.put("latestBlock", (<any>latestBlock).block_with_signatures.block.Version2.hash);
         });
     }
 
@@ -47,10 +51,7 @@ export class BlocksSteps {
         const latestBlockSdk: any = this.contextMap.get("blockDataSdk");
         const latestBlockNode: any = this.contextMap.get("blockDataNode");
 
-        expect(latestBlockSdk.block.body.proposer).to.be.eql(latestBlockNode.body.proposer);
-        expect(latestBlockSdk.block.body.deploy_hashes).to.not.be.undefined;
-        // noinspection JSUnresolvedReference
-        expect(latestBlockSdk.block.body.transfer_hashes).to.not.be.undefined;
+        expect(latestBlockSdk.block.Version2.body).to.be.eql(latestBlockNode.block.Version2.body);
     }
 
     @then(/^the hash of the returned block is equal to the hash of the returned test node block$/)
@@ -66,21 +67,22 @@ export class BlocksSteps {
     public theHeaderOfTheReturnedBlockIsEqualToTheHeaderOfTheReturnedTestNodeBlock() {
         console.info("And the header of the returned block is equal to the header of the returned test node block");
 
-        const latestBlockSdk: any = this.contextMap.get("blockDataSdk");
-        const latestBlockNode: any = this.contextMap.get("blockDataNode");
+        const latestBlockSdkHeader: any = (<any>this.contextMap.get("blockDataSdk")).block.Version2.header;
+        const latestBlockNodeHeader: any = (<any>this.contextMap.get("blockDataNode")).block.Version2.header;
 
-        expect(latestBlockSdk.block.header.parent_hash).to.be.eql(latestBlockNode.header.parent_hash);
-        expect(latestBlockSdk.block.header.state_root_hash).to.be.eql(latestBlockNode.header.state_root_hash);
-        expect(latestBlockSdk.block.header.body_hash).to.be.eql(latestBlockNode.header.body_hash);
-        expect(latestBlockSdk.block.header.random_bit).to.be.eql(latestBlockNode.header.random_bit);
-        // noinspection JSUnresolvedReference
-        expect(latestBlockSdk.block.header.accumulated_seed).to.be.eql(latestBlockNode.header.accumulated_seed);
-        // noinspection JSUnresolvedReference
-        expect(latestBlockSdk.block.header.era_end).to.be.eql(latestBlockNode.header.era_end);
-        expect(latestBlockSdk.block.header.timestamp).to.be.eql(latestBlockNode.header.timestamp);
-        expect(latestBlockSdk.block.header.era_id).to.be.eql(latestBlockNode.header.era_id);
-        expect(latestBlockSdk.block.header.height).to.be.eql(latestBlockNode.header.height);
-        expect(latestBlockSdk.block.header.protocol_version).to.be.eql(latestBlockNode.header.protocol_version);
+        expect(latestBlockSdkHeader.parent_hash).to.be.eql(latestBlockNodeHeader.parent_hash);
+        expect(latestBlockSdkHeader.state_root_hash).to.be.eql(latestBlockNodeHeader.state_root_hash);
+        expect(latestBlockSdkHeader.body_hash).to.be.eql(latestBlockNodeHeader.body_hash);
+        expect(latestBlockSdkHeader.random_bit).to.be.eql(latestBlockNodeHeader.random_bit);
+        expect(latestBlockSdkHeader.accumulated_seed).to.be.eql(latestBlockNodeHeader.accumulated_seed);
+        expect(latestBlockSdkHeader.era_end).to.be.eql(latestBlockNodeHeader.era_end);
+        expect(latestBlockSdkHeader.timestamp).to.be.eql(latestBlockNodeHeader.timestamp);
+        expect(latestBlockSdkHeader.era_id).to.be.eql(latestBlockNodeHeader.era_id);
+        expect(latestBlockSdkHeader.height).to.be.eql(latestBlockNodeHeader.height);
+        expect(latestBlockSdkHeader.protocol_version).to.be.eql(latestBlockNodeHeader.protocol_version);
+        expect(latestBlockSdkHeader.proposer).to.be.eql(latestBlockNodeHeader.proposer);
+        expect(latestBlockSdkHeader.current_gas_price).to.be.eql(latestBlockNodeHeader.current_gas_price);
+        expect(latestBlockSdkHeader.last_switch_block_hash).to.be.eql(latestBlockNodeHeader.last_switch_block_hash);
     }
 
     @then(/^the proofs of the returned block are equal to the proofs of the returned test node block$/)
@@ -88,15 +90,15 @@ export class BlocksSteps {
 
         console.info("And the proofs of the returned block are equal to the proofs of the returned test node block");
 
-        const latestBlockSdk: any = this.contextMap.get("blockDataSdk");
-        const latestBlockNode: any = this.contextMap.get("blockDataNode");
+        const latestBlockSdkProofs: any = (<any>this.contextMap.get("blockDataSdk")).proofs;
+        const latestBlockNodeProofs: any = (<any>this.contextMap.get("blockDataNode")).proofs;
 
-        expect(latestBlockSdk.block.proofs.length).to.be.gte(4);
+        expect(latestBlockSdkProofs.length).to.be.gte(4);
 
-        expect(latestBlockSdk.block.proofs.length).to.be.eql(latestBlockNode.proofs.length);
+        expect(latestBlockSdkProofs.length).to.be.eql(latestBlockNodeProofs.length);
 
-        for (const [index, proof] of latestBlockSdk.block.proofs.entries()) {
-            const nodeProof = latestBlockNode.proofs[index];
+        for (const [index, proof] of latestBlockSdkProofs.entries()) {
+            const nodeProof = latestBlockNodeProofs[index];
             expect(proof.public_key).to.be.eql(nodeProof.public_key);
             expect(proof.signature).to.be.eql(nodeProof.signature);
         }
@@ -107,7 +109,7 @@ export class BlocksSteps {
         console.info("Given that a block is returned by hash via the sdk");
 
         await this.casperClient.nodeClient.getBlockInfo(this.contextMap.get("latestBlock")).then(blockResult => {
-            this.contextMap.put('blockDataSdk', blockResult);
+            this.contextMap.put('blockDataSdk', blockResult.block_with_signatures);
         });
     }
 
@@ -116,8 +118,8 @@ export class BlocksSteps {
         console.info("Given that a block is returned by height [{}] via the sdk", height);
 
         await this.casperClient.nodeClient.getBlockInfoByHeight(height).then(blockResult => {
-            this.contextMap.put('blockDataSdk', blockResult);
-            this.contextMap.put('blockHashSdk', blockResult.block?.hash);
+            this.contextMap.put('blockDataSdk', blockResult.block_with_signatures);
+            this.contextMap.put('blockHashSdk', (<any>blockResult).block_with_signatures.block.Version2.hash);
         });
     }
 
@@ -149,28 +151,6 @@ export class BlocksSteps {
         expect(csprClientException.message).to.be.eql('No such block');
     }
 
-    @then(/^the deploy response contains a valid deploy hash$/)
-    public theDeployResponseContainsAValidDeployHash() {
-
-        console.info("Then the deploy response contains a valid deploy hash");
-        const deployResult: string = this.contextMap.get("deployResult");
-        expect(deployResult).to.not.be.null;
-        expect(deployResult).to.not.be.undefined;
-    }
-
-    @then(/^request the block transfer$/, undefined, 320000)
-    public async requestTheBlockTransfer() {
-
-        console.info("Then request the block transfer");
-
-        const deploy: Deploy = this.contextMap.get('putDeploy');
-        const deployResult = await this.casperClient.nodeClient.waitForDeploy(deploy, 300000);
-        const transfers = await this.casperClient.nodeClient.getBlockTransfers(deployResult.execution_results[0].block_hash);
-        this.contextMap.put('blockHash', deployResult.execution_results[0].block_hash);
-        this.contextMap.put("transferBlockSdk", transfers);
-    }
-
-
     @then(/^request the returned block from the test node via its hash$/)
     public requestTheReturnedBlockFromTheTestNodeViaItsHash() {
 
@@ -186,81 +166,6 @@ export class BlocksSteps {
         this.contextMap.put('nodeEraSwitchBlockResult', this.node.getChainEraInfo());
     }
 
-    @then(/^request the block transfer from the test node$/)
-    public requestTheBlockTransferFromTheTestNode() {
-
-        console.info("Then request the block transfer from the test node");
-
-        let blockHash: string = this.contextMap.get('blockHash');
-
-        this.contextMap.put('transferBlockNode', this.node.getChainBlockTransfers(blockHash));
-    }
-
-    @given(/^that chain transfer data is initialised$/)
-    public thatChainTransferDataIsInitialised() {
-        console.info("Given that chain transfer data is initialised");
-
-        const senderKeyPair = this.casperClient.loadKeyPairFromPrivateFile(`./assets/net-1/user-1/secret_key.pem`, Keys.SignatureAlgorithm.Ed25519);
-        const receiverKeyPair = this.casperClient.loadKeyPairFromPrivateFile(`./assets/net-1/user-2/secret_key.pem`, Keys.SignatureAlgorithm.Ed25519);
-
-        expect(senderKeyPair).to.not.be.undefined;
-        expect(receiverKeyPair).to.not.be.undefined;
-
-        this.contextMap.put("senderKeyPair", senderKeyPair);
-        this.contextMap.put("receiverKeyPair", receiverKeyPair);
-        this.contextMap.put("transferAmount", 2500000000);
-        this.contextMap.put("gasPrice", 1);
-        this.contextMap.put("ttlMinutes", "30m");
-    }
-
-    @when(/^the deploy data is put on chain$/)
-    public async theDeployDataIsPutOnChain() {
-        console.info("When the deploy data is put on chain");
-
-        const amount = BigNumber.from(this.contextMap.get('transferAmount'));
-        const receiverKeyPair = this.contextMap.get('receiverKeyPair') as any;
-        const senderKeyPair = this.contextMap.get('senderKeyPair') as any;
-        const id = BigNumber.from(Math.round(Math.random()));
-        const gasPrice: number = this.contextMap.get('gasPrice');
-        const ttl = DeployUtil.dehumanizerTTL(this.contextMap.get('ttlMinutes'));
-
-        const transfer = DeployUtil.ExecutableDeployItem.newTransfer(amount, receiverKeyPair.publicKey, undefined, id);
-        expect(transfer).to.not.be.undefined;
-
-        const standardPayment = DeployUtil.standardPayment(BigNumber.from(100000000));
-        expect(standardPayment).to.not.be.undefined;
-
-        const deployParams = new DeployUtil.DeployParams(senderKeyPair.publicKey, TestParameters.getInstance().chainName, gasPrice, ttl);
-        const deploy = DeployUtil.makeDeploy(deployParams, transfer, standardPayment);
-
-        this.casperClient.signDeploy(deploy, senderKeyPair);
-
-        const deployResult = await this.casperClient.putDeploy(deploy);
-        expect(deployResult).to.not.be.null;
-        this.contextMap.put('deployResult', deployResult);
-
-        const hash = encodeBase16(deploy.hash);
-        this.contextMap.put('putDeploy', deploy);
-        this.contextMap.put("deployResult", hash);
-    }
-
-    @then(/^the returned block contains the transfer hash returned from the test node block$/)
-    public theReturnedBlockContainsTheTransferHashReturnedFromTheTestNodeBlock() {
-
-        console.info("And the returned block contains the transfer hash returned from the test node block");
-
-        const deployResult = this.contextMap.get("deployResult");
-
-        expect(deployResult).to.not.be.undefined;
-
-        const transferBlockNode: any = this.contextMap.get('transferBlockNode');
-
-        expect(transferBlockNode).to.not.be.undefined;
-        // noinspection JSUnresolvedReference
-        expect(transferBlockNode.body.transfer_hashes.length).to.be.eql(1);
-        expect(transferBlockNode.body.transfer_hashes[0]).to.be.eql(deployResult);
-    }
-
     @given(/^that an invalid block height is requested via the sdk$/)
     public async thatAnInvalidBlockHeightIsRequestedViaTheSdk() {
 
@@ -273,4 +178,78 @@ export class BlocksSteps {
 
         expect(blockInfo).to.be.undefined;
     }
+
+    @given(/^that (\d+) node transfers are initiated$/)
+    public async thatNNodeTransfersAreInitiated(transfers:number){
+
+        console.info("that a node transfer is initiated");
+
+        this.contextMap.put('transfers', this.node.getTransfers(transfers));
+
+    };
+
+    @then(/^a list of (\d+) transaction hashes are generated$/)
+    public async thatNTransactionHashesAreGenerated(transfers:number){
+
+        console.info("a list of transactions is generated");
+
+        expect(this.contextMap.get('transfers')).to.be.not.undefined;
+
+        let _transfers: string[] = this.contextMap.get('transfers');
+
+        expect(_transfers.length).to.be.eql(transfers);
+
+    };
+
+    @then(/^each transaction has a transacted block$/, '',50000)
+    public async thatEachTransactionHasATransactedBlock(){
+
+        console.info("that each transaction has a transacted block");
+
+        let transfers: string[] = this.contextMap.get('transfers');
+        let blockHashes: string[] = [];
+        let transaction: any;
+
+        for (const transfer of transfers) {
+
+            transaction = await this.simpleRpcClient.getTransaction(transfer);
+
+            if (transaction.result.execution_info === null){
+                do{
+                    await this.node.awaitNBlocks(5);
+                    transaction = await this.simpleRpcClient.getTransaction(transfer);
+                } while (transaction.result.execution_info === null)
+            }
+
+            blockHashes.push(transaction.result.execution_info.block_hash)
+
+        }
+
+        this.contextMap.put('blockHashes', blockHashes);
+
+    };
+
+    @then(/^the transactions of the SDK block equal the transactions on the node block$/)
+    public async thatTheTransactionsOfTheSDKBlockEqualTheTransactionsOnTheNodeBlock(){
+
+        console.info("that the transactions of the SDK block equal the transactions on the node block");
+
+        let blockHashes: string[] = this.contextMap.get('blockHashes');
+
+        for (const blockHash of blockHashes){
+            await this.validateTransactions(blockHash);
+        }
+
+
+    };
+
+    private async validateTransactions(blockHash: string): Promise<void> {
+
+        let blockResultSdk = await this.casperClient.nodeClient.getBlockInfo(blockHash);
+        let blockResultNode = await this.node.getChainBlock(blockHash);
+
+        expect((<any>blockResultSdk).block_with_signatures.block.Version2.body.transactions).to.be.eql(blockResultNode.block.Version2.body.transactions);
+
+    }
+
 }

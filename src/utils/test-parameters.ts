@@ -4,9 +4,9 @@
 export class TestParameters {
 
     private static DEFAULT_HOST = 'localhost';
-    private static DEFAULT_RCP_PORT = '11101';
+    private static DEFAULT_RCP_PORT = '21101';
     private static DEFAULT_REST_PORT = '1401';
-    private static DEFAULT_SSE_PORT = '18101';
+    private static DEFAULT_SSE_PORT = '14101';
     private static DEFAULT_SPX_PORT = '25101';
     private static DEFAULT_DOCKER_NAME = 'cspr-cctl';
     private static DEFAULT_CHAIN_NAME = 'cspr-dev-cctl';
@@ -27,6 +27,7 @@ export class TestParameters {
                 this.processArgv(val);
             }
         });
+
     }
 
     public static getInstance(): TestParameters {

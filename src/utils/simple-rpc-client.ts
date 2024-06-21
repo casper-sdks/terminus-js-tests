@@ -21,6 +21,10 @@ export class SimpleRpcClient {
         return this.rpc("chain_get_era_summary", `[{"Hash":  "${hash}"}]`);
     }
 
+    public async getTransaction(hash: string): Promise<any> {
+        return this.rpc("info_get_transaction", `{"transaction_hash": {"Deploy": "${hash}"}}`);
+    }
+
     public async queryGetBalance(purseIdentiferName: string, identifier: string): Promise<any> {
         return this.rpc('query_balance', `{"purse_identifier":{"${purseIdentiferName}":"${identifier}"}}`)
     }
